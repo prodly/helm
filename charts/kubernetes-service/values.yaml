@@ -1,0 +1,112 @@
+# Default values for your service.
+#
+# It is expected to provide specific values for this file either by:
+# 1. [RECOMMENDED] Override particular files in Helm chart using Skaffold profiles.
+# 2. Copying the file by itself into service repository and modify its content.
+#
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.0.0"
+
+# This section describes Docker image properties for your service
+image:
+  repository: "YOUR_SERVICE_DOCKER_IMAGE_TAG"
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+# THis section describes properties of your service itself
+service:
+  type: NodePort
+  port: "YOUR_SERVICE_PORT"
+  path: "YOUR_SERVICE_CONTEXT_PATH"
+
+# Permissions section
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: "YOUR_SERVICE_EXTERNAL_HOST_NAME_FROM_ROUTE_53"
+      paths:
+        - path: "/YOUR_SERVICE_CONTEXT_PATH"
+          pathType: Prefix
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+#
+# minAvailable - When you specify an integer, it represents a number of Pods.
+# For instance, if you set minAvailable to 10, then 10 Pods must always be available,
+# even during a disruption.
+#
+# maxUnavailable When you specify a percentage by setting the value to a string representation
+# of a percentage (eg. "50%"), it represents a percentage of total Pods. For instance, if you set
+# maxUnavailable to "50%", then only 50% of the Pods can be unavailable during a disruption.
+disruptionBudget:
+  enabled: false
+  spec:
+    maxUnavailable: 49%
+
+# https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+# the affinity allowing you to constrain which nodes your Pod can be scheduled on based
+# on node labels. There are two types of node affinity:
+#   requiredDuringSchedulingIgnoredDuringExecution: The scheduler can't schedule the Pod unless the rule is met.
+#   This functions like nodeSelector, but with a more expressive syntax.
+#
+#   preferredDuringSchedulingIgnoredDuringExecution: The scheduler tries to find a node that meets
+#   the rule. If a matching node is not available, the scheduler still schedules the Pod.
+#
+# You can specify a weight between 1 and 100 for each instance of the
+# preferredDuringSchedulingIgnoredDuringExecution affinity type. When the scheduler finds nodes
+# that meet all the other scheduling requirements of the Pod, the scheduler iterates through every
+# preferred rule that the node satisfies and adds the value of the weight for that expression to a sum.
+
+#affinity:
+#  podAntiAffinity:
+#    preferredDuringSchedulingIgnoredDuringExecution:
+#      - weight: 100
+#        podAffinityTerm:
+#          labelSelector:
+#            matchExpressions:
+#              - key: "app.kubernetes.io/name"
+#                operator: In
+#                values:
+#                  - "kubernetes-service"
+#          topologyKey: "kubernetes.io/hostname"
+
+#nodeSelector:
+#  name: "backend"

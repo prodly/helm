@@ -42,25 +42,25 @@ spec:
           livenessProbe:
             httpGet:
               path: '{{ .Values.service.path }}/actuator/health'
-              port: {{ .Values.service.port }}
+              port: {{ .Values.service.port | quote }}
             initialDelaySeconds: 45
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: '{{ .Values.service.path }}/actuator/health'
-              port: {{ .Values.service.port }}
+              port: {{ .Values.service.port | quote }}
             initialDelaySeconds: 30
             periodSeconds: 30
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: PORT
-              value: '{{ .Values.service.port }}'
+              value: {{ .Values.service.port | quote }}
             - name: SERVER_SERVLET_CONTEXT_PATH
               value: '/{{ .Values.service.path }}'
             {{- range $key, $val := .Values.env }}
             - name: {{ $key }}
-              value: {{ $val }}
+              value: {{ $val | quote }}
             {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

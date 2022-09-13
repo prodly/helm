@@ -42,13 +42,13 @@ spec:
           livenessProbe:
             httpGet:
               path: '{{ .Values.service.path }}/actuator/health'
-              port: {{ .Values.service.port | quote }}
+              port: {{ .Values.service.port }}
             initialDelaySeconds: 45
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: '{{ .Values.service.path }}/actuator/health'
-              port: {{ .Values.service.port | quote }}
+              port: {{ .Values.service.port }}
             initialDelaySeconds: 30
             periodSeconds: 30
           resources:

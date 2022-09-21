@@ -65,7 +65,7 @@ spec:
             {{- end }}
         {{- if .Values.sqsd.enabled }}
         - name: {{ .Chart.Name }}-sqsd
-           securityContext:
+          securityContext:
             {{- toYaml .Values.sqsd.securityContext | nindent 12 }}
           image: {{ .Values.sqsd.repository }}:{{ .Values.sqsd.tag | default "latest" }}
           imagePullPolicy: {{ .Values.sqsd.pullPolicy }}

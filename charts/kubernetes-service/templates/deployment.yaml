@@ -63,7 +63,7 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end }}
-#        {{- if eq .Values.sqsd.enabled "true" }}
+        {{- if eq .Values.sqsd.enabled true }}
         - name: {{ .Chart.Name }}-sqsd
            securityContext:
             {{- toYaml .Values.sqsd.securityContext | nindent 12 }}
@@ -88,7 +88,7 @@ spec:
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE
               value: {{ .Values.sqsd.workerContentType | quote }}
-#        {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
@@ -62,7 +63,7 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end }}
-        {{- if .Values.sqsd,enabled == true }}
+        {{- if .Values.sqsd.enabled == true }}
         - name: {{ .Chart.Name }}-sqsd
            securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -82,24 +83,11 @@ spec:
             - name: SQSD_WAIT_TIME_SECONDS
               value: {{ .Values.sqsd.waitTime | quote }}
             - name: SQSD_WORKER_HTTP_HOST
-              value: {{ .Values.sqsd.workerHttpHost | quote }}
+              value: http://{{ include "kubernetes-service.fullname" }}.{{ .Release.Namespace }}
             - name: SQSD_WORKER_HTTP_PATH
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE
               value: {{ .Values.sqsd.workerContentType | quote }}
-
-  queueName: "WORKER_QUEUE_NAME"
-  queueRegion: "WORKER_QUEUE_REGION"
-  maxMessagesPerRequest: 10
-  runDaemonized: true
-  sleepTime: 10
-  waitTime: 10
-  # workerHttpHost is set with protocol (http:// | https://)
-  workerHttpHost: "WORKER_HTTP_HOSTNAME"
-  # Worker app endpoint
-  workerHttpPath: "/"
-  workerContentType: "application/json"
-
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

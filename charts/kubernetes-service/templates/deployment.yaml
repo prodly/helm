@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
@@ -62,6 +63,32 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end }}
+        {{- if .Values.sqsd.enabled == true }}
+        - name: {{ .Chart.Name }}-sqsd
+           securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.sqsd.repository }}:{{ .Values.sqsd.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.sqsd.pullPolicy }}
+          env:
+            - name: SQSD_QUEUE_NAME
+              value: {{ .Values.sqsd.queueName | quote }}
+            - name: SQS_QUEUE_REGION_NAME
+              value: {{ .Values.sqsd.queueRegion | quote }}
+            - name: SQSD_MAX_MESSAGES_PER_REQUEST
+              value: {{ .Values.sqsd.maxMessagesPerRequest | quote }}
+            - name: SQSD_RUN_DAEMONIZED
+              value: {{ .Values.sqsd.runDaemonized | quote }}
+            - name: SQSD_SLEEP_SECONDS
+              value: {{ .Values.sqsd.sleepTime | quote }}
+            - name: SQSD_WAIT_TIME_SECONDS
+              value: {{ .Values.sqsd.waitTime | quote }}
+            - name: SQSD_WORKER_HTTP_HOST
+              value: http://{{ include "kubernetes-service.fullname" }}.{{ .Release.Namespace }}
+            - name: SQSD_WORKER_HTTP_PATH
+              value: {{ .Values.sqsd.workerHttpPath | quote }}
+            - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE
+              value: {{ .Values.sqsd.workerContentType | quote }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

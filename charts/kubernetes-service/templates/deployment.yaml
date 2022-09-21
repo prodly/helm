@@ -63,9 +63,9 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end }}
-        {{- if eq .Values.sqsd.enabled "true" }}
+        {{- if ( default .Values.sqsd.enabled false ) }}
         - name: {{ .Chart.Name }}-sqsd
-           securityContext:
+          securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.sqsd.repository }}:{{ .Values.sqsd.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.sqsd.pullPolicy }}
@@ -83,7 +83,7 @@ spec:
             - name: SQSD_WAIT_TIME_SECONDS
               value: {{ .Values.sqsd.waitTime | quote }}
             - name: SQSD_WORKER_HTTP_HOST
-              value: http://{{ include "kubernetes-service.fullname" }}.{{ .Release.Namespace }}
+              value: "http://{{ include "kubernetes-service.fullname" }}.{{ .Release.Namespace }}:{{ .Values.service.port }}"
             - name: SQSD_WORKER_HTTP_PATH
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE

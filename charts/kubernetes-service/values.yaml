@@ -29,6 +29,25 @@ service:
   path: "YOUR_SERVICE_CONTEXT_PATH"
   customHealthCheckPath: ""
 
+sqsd:
+  enabled: false
+  repository: "YOUR_SERVICE_DOCKER_IMAGE_TAG"
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+  queueName: "WORKER_QUEUE_NAME"
+  queueRegion: "WORKER_QUEUE_REGION"
+  maxMessagesPerRequest: 10
+  runDaemonized: true
+  sleepTime: 10
+  waitTime: 10
+  # workerHttpHost is set with protocol (http:// | https://)
+  workerHttpHost: "WORKER_HTTP_HOSTNAME"
+  # Worker app endpoint
+  workerHttpPath: "/"
+  workerContentType: "application/json"
+  serviceAccount: "SQSD_SERVICE_ACCOUNT"
+
 # Permissions section
 serviceAccount: ""
 

@@ -22,7 +22,7 @@ spec:
       failureLimit: {{ default .Values.rollout.analysis.failureLimit 3 }}
       provider:
         prometheus:
-          address: "http://prometheus-service.prometheus:9090"
+          address: "http://prometheus-server.prometheus:80"
           query: |
             sum(irate(
               nginx_ingress_controller_requests{ingress=~"{{ include "kubernetes-service.fullname" . }}",status=~"5.*"}[5m]

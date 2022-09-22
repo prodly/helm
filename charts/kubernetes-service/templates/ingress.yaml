@@ -1,8 +1,9 @@
 {{- if .Values.ingress.enabled -}}
+{{- $fullName := "to-be-defined" }}
 {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
-{{- $fullName := printf "%s-%s" ( include "kubernetes-service.fullname" . ) "-active" -}}
+{{- $fullName = printf "%s-%s" ( include "kubernetes-service.fullname" . ) "active" -}}
 {{- else }}
-{{- $fullName := include "kubernetes-service.fullname" . -}}
+{{- $fullName = include "kubernetes-service.fullname" . -}}
 {{- end }}
 {{- $svcPort := .Values.service.port -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}

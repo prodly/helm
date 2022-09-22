@@ -65,7 +65,7 @@ spec:
       # This allows the preview stack to be reachable without serving production traffic.
       # This field is optional.
       previewService: {{ include "kubernetes-service.fullname" . }}-preview
-      autoPromotionEnabled: {{ default .Values.rollout.blueGreen.autoPromotionEnabled true }}
+      autoPromotionEnabled: {{ if (eq ( default "false" ( .Values.rollout.blueGreen.autoPromotionEnabled | toString | lower ) ) "false") }}false{{ else }}true{{ end }}
       {{- if .Values.rollout.blueGreen.autoPromotionSeconds }}
       autoPromotionSeconds: {{ .Values.rollout.blueGreen.autoPromotionSeconds }}
       {{- end }}

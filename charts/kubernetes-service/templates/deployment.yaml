@@ -46,7 +46,7 @@ spec:
         nginx:
           # Reference to an Ingress which has a rule pointing to the stable service
           # This Ingress will be closed with a new name, in order to achieve NGINX traffic splitting
-          stableIngress: {{ include "kubernetes-service.fullname" . }}-active
+          stableIngress: {{ include "kubernetes-service.fullname" . }}
       analysis:
         startingStep: {{ default .Values.rollout.analysis.startingStep 1 }}
         templates:

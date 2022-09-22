@@ -32,33 +32,79 @@ spec:
   strategy:
   {{- if ( default .Values.rollout.canary.enabled false ) }}
     canary:
-      # Reference to a Service which the controller will update to point to the canary ReplicaSet
-      #canaryService: {{ include "kubernetes-service.fullname" . }}-canary
+      {{- if .Values.rollout.rollingUpdate.maxUnavailable }}
+      maxUnavailable: {{ .Values.rollout.rollingUpdate.maxUnavailable }}
+      {{- end }}
+      {{- if .Values.rollout.rollingUpdate.maxSurge }}
+      maxSurge: {{ .Values.rollout.rollingUpdate.maxSurge }}
+      {{- end }}
       # Reference to a Service which the controller will update to point to the stable ReplicaSet
-      #stableService: {{ include "kubernetes-service.fullname" . }}
-      #trafficRouting:
-        #nginx:
+      stableService: {{ include "kubernetes-service.fullname" . }}-active
+      # Reference to a Service which the controller will update to point to the canary ReplicaSet
+      canaryService: {{ include "kubernetes-service.fullname" . }}-preview
+      trafficRouting:
+        nginx:
           # Reference to an Ingress which has a rule pointing to the stable service
           # This Ingress will be closed with a new name, in order to achieve NGINX traffic splitting
-          #stableIngress: {{ include "kubernetes-service.fullname" . }}
-      maxUnavailable: {{ if not ( kindIs "invalid" .Values.rollout.canary.maxUnavailable ) }}{{ .Values.rollout.canary.maxUnavailable }}{{ else }}{{ printf "25%%" }}{{ end }}
-      maxSurge: {{ if not ( kindIs "invalid" .Values.rollout.canary.maxSurge ) }}{{ .Values.rollout.canary.maxSurge }}{{ else }}{{ printf "25%%" }}{{ end }}
+          stableIngress: {{ include "kubernetes-service.fullname" . }}-active
       analysis:
+        startingStep: {{ default .Values.rollout.analysis.startingStep 1 }}
         templates:
           - templateName: {{ include "kubernetes-service.fullname" . }}-success-rate
-        startingStep: {{ default .Values.rollout.analysis.startingStep 1 }}
+        args:
+          - name: service-name
+            value: {{ include "kubernetes-service.fullname" . }}-preview
       steps:
         {{- toYaml .Values.rollout.canary.steps | nindent 8 }}
   {{- else if ( default .Values.rollout.blueGreen.enabled false ) }}
     blueGreen:
-
+      # activeService specifies the service to update with the new template hash at time of promotion.
+      # This field is mandatory for the blueGreen update strategy.
+      activeService: {{ include "kubernetes-service.fullname" . }}-active
+      # previewService specifies the service to update with the new template hash before promotion.
+      # This allows the preview stack to be reachable without serving production traffic.
+      # This field is optional.
+      previewService: {{ include "kubernetes-service.fullname" . }}-preview
+      autoPromotionEnabled: {{ default .Values.rollout.blueGreen.autoPromotionEnabled true }}
+      {{- if .Values.rollout.blueGreen.autoPromotionSeconds }}
+      autoPromotionSeconds: {{ .Values.rollout.blueGreen.autoPromotionSeconds }}
+      {{- end }}
+      {{- if .Values.rollout.blueGreen.scaleDownDelaySeconds }}
+      scaleDownDelaySeconds: {{ .Values.rollout.blueGreen.scaleDownDelaySeconds }}
+      {{- end }}
+      {{- if .Values.rollout.blueGreen.scaleDownDelayRevisionLimit }}
+      scaleDownDelayRevisionLimit: {{ .Values.rollout.blueGreen.scaleDownDelayRevisionLimit }}
+      {{- end }}
+      {{- if .Values.rollout.blueGreen.previewReplicaCount }}
+      previewReplicaCount: {{ .Values.rollout.blueGreen.previewReplicaCount }}
+      {{- end }}
+      {{- if .Values.rollout.blueGreen.enablePrePromotionAnalysis }}
+      prePromotionAnalysis:
+        templates:
+          - templateName: {{ include "kubernetes-service.fullname" . }}-success-rate
+        args:
+          - name: service-name
+            value: {{ include "kubernetes-service.fullname" . }}-preview
+      {{- end }}
+      {{- if .Values.rollout.blueGreen.enablePostPromotionAnalysis }}
+      postPromotionAnalysis:
+        templates:
+          - templateName: {{ include "kubernetes-service.fullname" . }}-success-rate
+        args:
+          - name: service-name
+            value: {{ include "kubernetes-service.fullname" . }}-preview
+      {{- end }}
   {{- else if ( default .Values.rollout.recreate.enabled false ) }}
     type: Recreate
   {{- else }}
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: {{ if not ( kindIs "invalid" .Values.rollout.rollingUpdate.maxUnavailable ) }}{{ .Values.rollout.rollingUpdate.maxUnavailable }}{{ else }}{{ printf "25%%" }}{{ end }}
-      maxSurge: {{ if not ( kindIs "invalid" .Values.rollout.rollingUpdate.maxSurge ) }}{{ .Values.rollout.rollingUpdate.maxSurge }}{{ else }}{{ printf "25%%" }}{{ end }}
+      {{- if .Values.rollout.rollingUpdate.maxUnavailable }}
+      maxUnavailable: {{ .Values.rollout.rollingUpdate.maxUnavailable }}
+      {{- end }}
+      {{- if .Values.rollout.rollingUpdate.maxSurge }}
+      maxSurge: {{ .Values.rollout.rollingUpdate.maxSurge }}
+      {{- end }}
   {{- end }}
   template:
     metadata:

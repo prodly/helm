@@ -4,6 +4,8 @@ kind: AnalysisTemplate
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}-success-rate
 spec:
+  args:
+    - name: service-name
   metrics:
     - name: {{ include "kubernetes-service.fullname" . }}-success-rate
       {{- if .Values.rollout.analysis.initialDelay }}
@@ -18,16 +20,15 @@ spec:
       # NOTE: prometheus queries return results in the form of a vector
       # So it is common to access the index 0 of the returned array to obtain the value
       successCondition: len(result) == 0 || isNaN(result[0]) || isInf(result[0]) || result[0] >= {{ default .Values.rollout.analysis.successCondition 0.95 }}
-      #failureCondition: result[0] < {{ default .Values.rollout.analysis.successCondition 0.95 }}
       failureLimit: {{ default .Values.rollout.analysis.failureLimit 3 }}
       provider:
         prometheus:
           address: "http://prometheus-server.prometheus:80"
           query: |
             sum(irate(
-              nginx_ingress_controller_requests{ingress=~"{{ include "kubernetes-service.fullname" . }}",status=~"5.*"}[5m]
+              nginx_ingress_controller_requests{ingress=~"{{"{{"}}args.service-name{{"}}"}}",status=~"5.*"}[5m]
             )) /
             sum(irate(
-              nginx_ingress_controller_requests{ingress=~"{{ include "kubernetes-service.fullname" . }}"}[5m]
+              nginx_ingress_controller_requests{ingress=~"{{"{{"}}args.service-name{{"}}"}}"}[5m]
             ))
 {{- end }}

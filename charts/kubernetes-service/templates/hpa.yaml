@@ -14,7 +14,11 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     {{- end }}
+    {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+    name: {{ include "kubernetes-service.fullname" . }}-active
+    {{- else }}
     name: {{ include "kubernetes-service.fullname" . }}
+    {{- end }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

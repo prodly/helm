@@ -1,4 +1,9 @@
 {{- if .Values.ingress.enabled -}}
+{{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+{{- $fullName := printf "%s-%s" ( include "kubernetes-service.fullname" . ) "-active" -}}
+{{- else }}
+{{- $fullName := include "kubernetes-service.fullname" . -}}
+{{- end }}
 {{- $fullName := include "kubernetes-service.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
@@ -15,7 +20,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ include "kubernetes-service.fullname" . }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}

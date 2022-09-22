@@ -91,49 +91,59 @@ rollout:
   rollingUpdate:
     enabled: false
     # Defines maximum number of pods that can be unavailable during update process
-    maxUnavailable: 25%
+    #maxUnavailable: 25%
     # Defines maximum number of pods that can be created over thr desired number of pods
-    maxSurge: 25%
+    #maxSurge: 25%
 
   # Release a new version to a small percentage of the production traffic
   canary:
     enabled: false
-    # Defines maximum number of pods that can be unavailable during update process
-    maxUnavailable: 25%
-    # Defines maximum number of pods that can be created over thr desired number of pods
-    maxSurge: 25%
+    # Defines maximum number of pods that can be unavailable during update process (default - 25%)
+    #maxUnavailable: 25%
+    # Defines maximum number of pods that can be created over thr desired number of pods (default - 25%)
+    #maxSurge: 25%
     # List of Canary steps
     steps:
-      - setWeight: 20
+      - setWeight: 33
       - pause:
-          duration: 1m
-      - setWeight: 40
+          duration: 30s
+      - setWeight: 66
       - pause:
-          duration: 1m
-      - setWeight: 60
-      - pause:
-          duration: 1m
-      - setWeight: 80
-      - pause:
-          duration: 1m
+          duration: 30s
 
   # Recreate new complete environment before switching traffic
   blueGreen:
     enabled: false
+    # autoPromotionEnabled disables automated promotion of the new stack by pausing the rollout
+    # immediately before the promotion. If omitted, the default behavior is to promote the new
+    # stack as soon as the ReplicaSet are completely ready/available.
+    # Rollouts can be resumed using: `kubectl argo rollouts promote ROLLOUT`
+    autoPromotionEnabled: false
+    # Make the rollout automatically promote deployment once new set of service is healthy after N seconds
+    #autoPromotionSeconds: 600
+    # Delays scale down the old ReplicaSet after the active Service is switched to the new ReplicaSet (default - 30)
+    #scaleDownDelaySeconds: 1800
+    # Limits the number of old active ReplicaSets to keep scaled up while they wait for the scaleDownDelay to pass after being removed from the active service
+    #scaleDownDelayRevisionLimit: 15
+    # Number of replicas that the new version of an application should run (default - 100% of active replicas)
+    #previewReplicaCount: 1
+    # Configures Analysis before it switches traffic to the new version.
+    enablePrePromotionAnalysis: true
+    enablePostPromotionAnalysis: true
 
   # Sets properties for progressive delivery analysis during rollout
   analysis:
     # Do not start analysis until this amount of time after the analysis run starts
     #initialDelay: 1m
     # Interval between analysis queries
-    interval: 1m
+    #interval: 1m
     # Amount of queries to perform during analysis
-    count: 5
-    # Percentage of successful requests to consider analysis as successful
+    #count: 5
+    # Percentage of successful requests to consider analysis as successful (default - 0.95)
     successCondition: 0.95
-    #
+    # Amount of failures that are considered sufficient to mark analysis as failed (default - 3)
     failureLimit: 1
-    # Delay starting analysis run until certain weight step
+    # Delay starting analysis run until certain weight step (default - 1)
     startingStep: 1
 
   # Extra AnalysisTemplate objects

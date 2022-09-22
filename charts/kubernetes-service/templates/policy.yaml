@@ -2,7 +2,7 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: pdb-{{ include "helm.name" . }}
+  name: {{ include "kubernetes-service.name" . }}-pdb
   namespace: {{ .Release.Namespace }}
 {{- with .Values.disruptionBudget.spec }}
 spec:
@@ -10,5 +10,9 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "helm.name" . }}
+      {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+      app.kubernetes.io/name: {{ include "kubernetes-service.fullname" . }}-active
+      {{- else }}
+      app.kubernetes.io/name: {{ include "kubernetes-service.fullname" . }}
+      {{- end }}
 {{- end }}

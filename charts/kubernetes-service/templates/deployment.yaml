@@ -32,10 +32,6 @@ spec:
   strategy:
   {{- if ( default .Values.rollout.canary.enabled false ) }}
     canary:
-      # Reference to a Service which the controller will update to point to the canary ReplicaSet
-      canaryService: {{ include "kubernetes-service.fullname" . }}-canary
-      # Reference to a Service which the controller will update to point to the stable ReplicaSet
-      stableService: {{ include "kubernetes-service.fullname" . }}
       trafficRouting:
         nginx:
           # Reference to an Ingress which has a rule pointing to the stable service

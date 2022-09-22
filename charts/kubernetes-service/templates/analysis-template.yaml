@@ -1,0 +1,33 @@
+{{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: {{ include "kubernetes-service.fullname" . }}-success-rate
+spec:
+  metrics:
+    - name: {{ include "kubernetes-service.fullname" . }}-success-rate
+      {{- if .Values.rollout.analysis.initialDelay }}
+      initialDelay: {{ .Values.rollout.analysis.initialDelay }}
+      {{- end }}
+      {{- if .Values.rollout.analysis.interval }}
+      interval: {{ .Values.rollout.analysis.interval }}
+      {{- end }}
+      {{- if .Values.rollout.analysis.count }}
+      count: {{ .Values.rollout.analysis.count }}
+      {{- end }}
+      # NOTE: prometheus queries return results in the form of a vector
+      # So it is common to access the index 0 of the returned array to obtain the value
+      successCondition: len(result) == 0 || isNaN(result[0]) || isInf(result[0]) || result[0] >= {{ default .Values.rollout.analysis.successCondition 0.95 }}
+      failureCondition: result[0] < {{ default .Values.rollout.analysis.successCondition 0.95 }}
+      failureLimit: {{ default .Values.rollout.analysis.failureLimit 3 }}
+      provider:
+        prometheus:
+          address: "http://prometheus-service.prometheus:9090"
+          query: |
+            sum(irate(
+              nginx_ingress_controller_requests{ingress=~"{{ include "kubernetes-service.fullname" . }}",status=~"5.*"}[5m]
+            )) /
+            sum(irate(
+              nginx_ingress_controller_requests{ingress=~"{{ include "kubernetes-service.fullname" . }}"}[5m]
+            ))
+{{- end }}

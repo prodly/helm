@@ -80,6 +80,65 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+# Defines variety of rollout strategies Kubernetes can offer alongside with ArgoCD
+rollout:
+
+  # All existing pods will be killed before new ones are created
+  recreate:
+    enabled: false
+
+  # Gradually replace pods with newer versions to ensure that there are enough new pods to maintain the availability threshold
+  rollingUpdate:
+    enabled: false
+    # Defines maximum number of pods that can be unavailable during update process
+    maxUnavailable: 25%
+    # Defines maximum number of pods that can be created over thr desired number of pods
+    maxSurge: 25%
+
+  # Release a new version to a small percentage of the production traffic
+  canary:
+    enabled: false
+    # Defines maximum number of pods that can be unavailable during update process
+    maxUnavailable: 25%
+    # Defines maximum number of pods that can be created over thr desired number of pods
+    maxSurge: 25%
+    # List of Canary steps
+    steps:
+      - setWeight: 20
+      - pause:
+          duration: 1m
+      - setWeight: 40
+      - pause:
+          duration: 1m
+      - setWeight: 60
+      - pause:
+          duration: 1m
+      - setWeight: 80
+      - pause:
+          duration: 1m
+
+  # Recreate new complete environment before switching traffic
+  blueGreen:
+    enabled: false
+
+  # Sets properties for progressive delivery analysis during rollout
+  analysis:
+    # Do not start analysis until this amount of time after the analysis run starts
+    #initialDelay: 1m
+    # Interval between analysis queries
+    interval: 1m
+    # Amount of queries to perform during analysis
+    count: 5
+    # Percentage of successful requests to consider analysis as successful
+    successCondition: 0.95
+    #
+    failureLimit: 1
+    # Delay starting analysis run until certain weight step
+    startingStep: 1
+
+  # Extra AnalysisTemplate objects
+  extraAnalysisTemplates: {}
+
 # https://kubernetes.io/docs/tasks/run-application/configure-pdb/
 #
 # minAvailable - When you specify an integer, it represents a number of Pods.

@@ -1,5 +1,22 @@
+{{/* Ensuring that only one deployment strategy was enabled by user */}}
+{{- $multipleRolloutsRequested := 0 -}}
+{{- range list ( default .Values.rollout.recreate.enabled false ) ( default .Values.rollout.rollingUpdate.enabled false ) ( default .Values.rollout.canary.enabled false ) ( default .Values.rollout.blueGreen.enabled false ) -}}
+{{- if eq . true -}}
+{{- $multipleRolloutsRequested = add1 $multipleRolloutsRequested -}}
+{{- end -}}
+{{- end -}}
+
+{{- if gt $multipleRolloutsRequested 1 -}}
+{{- fail "Cannot enable multiple deployment strategies, please, pick only one" -}}
+{{- end -}}
+
+{{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+{{- else }}
 apiVersion: apps/v1
 kind: Deployment
+{{- end }}
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -12,6 +29,37 @@ spec:
   selector:
     matchLabels:
       {{- include "kubernetes-service.selectorLabels" . | nindent 6 }}
+  strategy:
+  {{- if ( default .Values.rollout.canary.enabled false ) }}
+    canary:
+      # Reference to a Service which the controller will update to point to the canary ReplicaSet
+      canaryService: {{ include "kubernetes-service.fullname" . }}-canary
+      # Reference to a Service which the controller will update to point to the stable ReplicaSet
+      stableService: {{ include "kubernetes-service.fullname" . }}
+      trafficRouting:
+        nginx:
+          # Reference to an Ingress which has a rule pointing to the stable service
+          # This Ingress will be closed with a new name, in order to achieve NGINX traffic splitting
+          stableIngress: {{ include "kubernetes-service.fullname" . }}
+      maxUnavailable: {{ if not ( kindIs "invalid" .Values.rollout.canary.maxUnavailable ) }}{{ .Values.rollout.canary.maxUnavailable }}{{ else }}{{ printf "25%%" }}{{ end }}
+      maxSurge: {{ if not ( kindIs "invalid" .Values.rollout.canary.maxSurge ) }}{{ .Values.rollout.canary.maxSurge }}{{ else }}{{ printf "25%%" }}{{ end }}
+      analysis:
+        templates:
+          - templateName: {{ include "kubernetes-service.fullname" . }}-success-rate
+        startingStep: {{ default .Values.rollout.analysis.startingStep 1 }}
+      steps:
+        {{- toYaml .Values.rollout.canary.steps | nindent 8 }}
+  {{- else if ( default .Values.rollout.blueGreen.enabled false ) }}
+    blueGreen:
+
+  {{- else if ( default .Values.rollout.recreate.enabled false ) }}
+    type: Recreate
+  {{- else }}
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ if not ( kindIs "invalid" .Values.rollout.rollingUpdate.maxUnavailable ) }}{{ .Values.rollout.rollingUpdate.maxUnavailable }}{{ else }}{{ printf "25%%" }}{{ end }}
+      maxSurge: {{ if not ( kindIs "invalid" .Values.rollout.rollingUpdate.maxSurge ) }}{{ .Values.rollout.rollingUpdate.maxSurge }}{{ else }}{{ printf "25%%" }}{{ end }}
+  {{- end }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -83,7 +131,8 @@ spec:
             - name: SQSD_WAIT_TIME_SECONDS
               value: {{ .Values.sqsd.waitTime | quote }}
             - name: SQSD_WORKER_HTTP_HOST
-              value: http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
+              value:
+                http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
             - name: SQSD_WORKER_HTTP_PATH
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE

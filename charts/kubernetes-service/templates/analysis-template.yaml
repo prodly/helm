@@ -3,6 +3,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}-success-rate
+  labels:
+    {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
   args:
     - name: service-name

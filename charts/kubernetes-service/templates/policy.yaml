@@ -3,6 +3,8 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "kubernetes-service.name" . }}-pdb
+  labels:
+    {{- include "kubernetes-service.labels" . | nindent 4 }}
   namespace: {{ .Release.Namespace }}
 {{- with .Values.disruptionBudget.spec }}
 spec:

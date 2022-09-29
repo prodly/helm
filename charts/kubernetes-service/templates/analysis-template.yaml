@@ -3,6 +3,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}-success-rate
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:

@@ -21,12 +21,14 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
 spec:
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}

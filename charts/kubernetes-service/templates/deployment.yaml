@@ -20,6 +20,8 @@ kind: Deployment
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
@@ -108,10 +110,11 @@ spec:
   {{- end }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        "meta.helm.sh/release-name": {{ .Release.Name }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "kubernetes-service.selectorLabels" . | nindent 8 }}
     spec:

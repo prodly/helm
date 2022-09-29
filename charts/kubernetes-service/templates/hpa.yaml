@@ -3,6 +3,9 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:

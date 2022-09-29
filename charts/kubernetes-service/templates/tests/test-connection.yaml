@@ -2,10 +2,12 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "kubernetes-service.fullname" . }}-test-connection"
-  labels:
-    {{- include "kubernetes-service.labels" . | nindent 4 }}
+  namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": test
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+  labels:
+    {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
   containers:
     - name: wget

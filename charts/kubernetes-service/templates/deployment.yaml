@@ -117,7 +117,7 @@ spec:
         {{- end }}
       labels:
         {{- include "kubernetes-service.selectorLabels" . | nindent 8 }}
-        {{ .Values.service.sg_role | indent 8 }}
+        sg_role: {{ .Values.service.sg_role | indent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

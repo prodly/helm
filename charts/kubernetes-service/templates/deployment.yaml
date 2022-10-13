@@ -23,6 +23,7 @@ metadata:
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}
   labels:
+    role: test-sg
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}

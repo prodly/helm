@@ -1,4 +1,4 @@
-{{ if .Values.efs.efs_enabled -}}
+{{ if .Values.efs.enabled -}}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:

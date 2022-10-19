@@ -31,7 +31,7 @@ service:
   sgRole: ""
 
 efs:
-  efs_enabled: false
+  efs: false
   efsClaimName: ""
   efsStorageClassName: ""
   efsStorageSpace: ""
@@ -54,7 +54,6 @@ sqsd:
   # Worker app endpoint
   workerHttpPath: "/"
   workerContentType: "application/json"
-  serviceAccount: "SQSD_SERVICE_ACCOUNT"
 
 # Permissions section
 serviceAccount: ""

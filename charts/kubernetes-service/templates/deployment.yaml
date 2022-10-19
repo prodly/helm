@@ -161,6 +161,11 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end }}
+          {{- if .Values.efs.efs_enabled }}
+          volumeMounts:
+            - name: efs-share-mount
+              mountPath: /mnt/efs
+          {{- end}}
         {{- if .Values.sqsd.enabled }}
         - name: {{ .Chart.Name }}-sqsd
           securityContext:

@@ -163,7 +163,7 @@ spec:
             {{- end }}
           {{- if .Values.efs.enabled }}
           volumeMounts:
-            - name: efs-share-mount
+            - name: efs-share
               mountPath: /mnt/
           {{- end}}
         {{- if .Values.sqsd.enabled }}

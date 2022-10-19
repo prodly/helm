@@ -117,7 +117,7 @@ spec:
         {{- end }}
       labels:
         {{- include "kubernetes-service.selectorLabels" . | nindent 8 }}
-        sg_role: {{ .Values.service.sg_role | indent 8 }}
+        sgRole: {{ .Values.service.sgRole | indent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -199,4 +199,10 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.efs.efs_enabled }}
+      volumes:
+        - name: {{ .Values.env }}-efs-share
+          persistentVolumeClaim:
+            claimName: {{ .Values.env }}-efs-claim
       {{- end }}

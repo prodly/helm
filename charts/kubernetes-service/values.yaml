@@ -28,7 +28,14 @@ service:
   port: "YOUR_SERVICE_PORT"
   path: "YOUR_SERVICE_CONTEXT_PATH"
   customHealthCheckPath: ""
-  sg_role: ""
+  sgRole: ""
+
+efs:
+  efs_enabled: false
+  efsClaimName: ""
+  efsStorageClassName: ""
+  efsStorageSpace: ""
+  efsAccessMode: "ReadWriteMany"
 
 sqsd:
   enabled: false

@@ -1,0 +1,14 @@
+{{ if .Values.efs.efs_enabled -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ .Values.env }}-efs-claim
+spec:
+  accessModes:
+    - {{ .Values.efs.efsAccessMode }}
+  volumeMode: Filesystem
+  storageClassName: {{ .Values.efs.efsStorageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.efs.efsStorageSpace }}
+{{ end -}}

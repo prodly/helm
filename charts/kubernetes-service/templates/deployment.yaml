@@ -202,7 +202,7 @@ spec:
       {{- end }}
       {{- if .Values.efs.efs_enabled }}
       volumes:
-        - name: {{ .Values.env }}-efs-share
+        - name: efs-share
           persistentVolumeClaim:
-            claimName: {{ .Values.env }}-efs-claim
+            claimName: efs-claim
       {{- end }}

@@ -142,14 +142,14 @@ spec:
             httpGet:
               path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health" .Values.service.path) }}'
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 45
-            periodSeconds: 30
+            initialDelaySeconds: {{ .Values.service.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.service.livenessProbe.periodSeconds }}
           readinessProbe:
             httpGet:
               path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health" .Values.service.path) }}'
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 30
-            periodSeconds: 30
+            initialDelaySeconds: {{ .Values.service.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.service.readinessProbe.periodSeconds }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:

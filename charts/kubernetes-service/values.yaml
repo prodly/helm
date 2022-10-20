@@ -27,8 +27,14 @@ service:
   type: NodePort
   port: "YOUR_SERVICE_PORT"
   path: "YOUR_SERVICE_CONTEXT_PATH"
-  customHealthCheckPath: ""
   sgRole: ""
+  customHealthCheckPath: ""
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 30
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 30
 
 efs:
   efs: false

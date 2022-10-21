@@ -164,7 +164,7 @@ spec:
           {{- if .Values.efs.enabled }}
           volumeMounts:
             - name: efs-share
-              mountPath: /mnt/
+              mountPath: /mnt/efs
           {{- end}}
         {{- if .Values.sqsd.enabled }}
         - name: {{ .Chart.Name }}-sqsd
@@ -209,5 +209,5 @@ spec:
       volumes:
         - name: efs-share
           persistentVolumeClaim:
-            claimName: efs-claim
+            claimName: {{ .Values.efs.claimName }}
       {{- end }}

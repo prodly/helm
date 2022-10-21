@@ -2,13 +2,13 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: efs-claim
+  name: {{ .Values.efs.claimName }}
 spec:
   accessModes:
-    - {{ .Values.efs.efsAccessMode }}
+    - {{ .Values.efs.accessMode }}
   volumeMode: Filesystem
-  storageClassName: {{ .Values.efs.efsStorageClassName }}
+  storageClassName: {{ .Values.efs.storageClassName }}
   resources:
     requests:
-      storage: {{ .Values.efs.efsStorageSpace }}
+      storage: {{ .Values.efs.storageSpace }}
 {{ end -}}

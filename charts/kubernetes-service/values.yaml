@@ -39,9 +39,6 @@ service:
 efs:
   efs: false
   efsClaimName: ""
-  efsStorageClassName: ""
-  efsStorageSpace: ""
-  efsAccessMode: "ReadWriteMany"
 
 sqsd:
   enabled: false

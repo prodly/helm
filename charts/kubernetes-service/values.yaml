@@ -27,7 +27,7 @@ service:
   type: NodePort
   port: "YOUR_SERVICE_PORT"
   path: "YOUR_SERVICE_CONTEXT_PATH"
-  sgRole: ""
+#  sgRole: ""
   customHealthCheckPath: ""
   livenessProbe:
     initialDelaySeconds: 30

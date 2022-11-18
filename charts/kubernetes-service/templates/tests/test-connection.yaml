@@ -6,12 +6,13 @@ metadata:
   annotations:
     "helm.sh/hook": test
     "meta.helm.sh/release-name": {{ .Release.Name }}
+    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
   containers:
     - name: wget
       image: busybox
-      command: ['wget']
-      args: ['{{ include "kubernetes-service.fullname" . }}:{{ .Values.service.port }}']
+      command: [ 'wget' ]
+      args: [ '{{ include "kubernetes-service.fullname" . }}:{{ .Values.service.port }}' ]
   restartPolicy: Never

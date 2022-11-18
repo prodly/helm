@@ -22,6 +22,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}
+    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
@@ -112,6 +113,7 @@ spec:
     metadata:
       annotations:
         "meta.helm.sh/release-name": {{ .Release.Name }}
+    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
         {{- with .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}

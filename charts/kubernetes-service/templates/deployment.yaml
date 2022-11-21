@@ -186,9 +186,13 @@ spec:
               value: {{ .Values.sqsd.sleepTime | quote }}
             - name: SQSD_WAIT_TIME_SECONDS
               value: {{ .Values.sqsd.waitTime | quote }}
+            {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
             - name: SQSD_WORKER_HTTP_HOST
-              value:
-                http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}
+              value: 'http://{{ include "kubernetes-service.fullname" . }}-active.{{ .Release.Namespace }}:{{ .Values.service.port }}'
+            {{- else }}
+            - name: SQSD_WORKER_HTTP_HOST
+              value: 'http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}'
+            {{- end }}
             - name: SQSD_WORKER_HTTP_PATH
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE

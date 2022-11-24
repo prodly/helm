@@ -199,5 +199,11 @@ disruptionBudget:
 #                  - "kubernetes-service"
 #          topologyKey: "kubernetes.io/hostname"
 
-#nodeSelector:
-#  name: "backend"
+nodeSelector:
+  name: "appops-backend"
+
+tolerations:
+  - key: "type"
+    operator: "Equal"
+    value: "appops-backend"
+    effect: "NoSchedule"

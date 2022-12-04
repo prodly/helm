@@ -22,7 +22,7 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-# THis section describes properties of your service itself
+# This section describes properties of your service itself
 service:
   type: NodePort
   port: "YOUR_SERVICE_PORT"
@@ -35,9 +35,11 @@ service:
     initialDelaySeconds: 30
     periodSeconds: 30
 
+env: {}
+
 efs:
-  efs: false
-  efsClaimName: ""
+  enabled: false
+  claimName: ""
 
 # Permissions section
 serviceAccount: ""
@@ -177,21 +179,27 @@ disruptionBudget:
 #                  - "kubernetes-service"
 #          topologyKey: "kubernetes.io/hostname"
 
+podAnnotations: {}
+imagePullSecrets: {}
+podSecurityContext: {}
+securityContext: {}
 nodeSelector: {}
+affinity: {}
 tolerations: {}
 
-# Section that enabled SQS daemon that reads messages from AWS SQS queue and delivers them via HTTP endpoint
+# Section that enables SQS daemon sidecar that reads messages from AWS SQS queue and delivers them via HTTP endpoint
 sqsd:
   enabled: false
   repository: "YOUR_SQSD_SERVICE_DOCKER_IMAGE_TAG"
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+  pullPolicy: IfNotPresent
   queueName: "WORKER_QUEUE_NAME"
-  # workerHttpHost is set with protocol (http:// | https://)
-  workerHttpHost: "WORKER_HTTP_HOSTNAME"
   # Worker app endpoint
   workerHttpPath: "/"
   workerContentType: "application/json"
+  # Miscellaneous options
+  securityContext: {}
   resources:
     limits:
       cpu: 250m

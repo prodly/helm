@@ -176,16 +176,6 @@ spec:
           env:
             - name: SQSD_QUEUE_NAME
               value: {{ .Values.sqsd.queueName | quote }}
-            - name: SQS_QUEUE_REGION_NAME
-              value: {{ .Values.sqsd.queueRegion | quote }}
-            - name: SQSD_MAX_MESSAGES_PER_REQUEST
-              value: {{ .Values.sqsd.maxMessagesPerRequest | quote }}
-            - name: SQSD_RUN_DAEMONIZED
-              value: {{ .Values.sqsd.runDaemonized | quote }}
-            - name: SQSD_SLEEP_SECONDS
-              value: {{ .Values.sqsd.sleepTime | quote }}
-            - name: SQSD_WAIT_TIME_SECONDS
-              value: {{ .Values.sqsd.waitTime | quote }}
             {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
             - name: SQSD_WORKER_HTTP_HOST
               value: 'http://{{ include "kubernetes-service.fullname" . }}-active.{{ .Release.Namespace }}:{{ .Values.service.port }}'
@@ -197,6 +187,8 @@ spec:
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE
               value: {{ .Values.sqsd.workerContentType | quote }}
+          resources:
+            {{- toYaml .Values.sqsd.resources | nindent 12 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -39,24 +39,6 @@ efs:
   efs: false
   efsClaimName: ""
 
-sqsd:
-  enabled: false
-  repository: "YOUR_SERVICE_DOCKER_IMAGE_TAG"
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
-  queueName: "WORKER_QUEUE_NAME"
-  queueRegion: "WORKER_QUEUE_REGION"
-  maxMessagesPerRequest: 10
-  runDaemonized: true
-  sleepTime: 10
-  waitTime: 10
-  # workerHttpHost is set with protocol (http:// | https://)
-  workerHttpHost: "WORKER_HTTP_HOSTNAME"
-  # Worker app endpoint
-  workerHttpPath: "/"
-  workerContentType: "application/json"
-
 # Permissions section
 serviceAccount: ""
 
@@ -197,3 +179,23 @@ disruptionBudget:
 
 nodeSelector: {}
 tolerations: {}
+
+# Section that enabled SQS daemon that reads messages from AWS SQS queue and delivers them via HTTP endpoint
+sqsd:
+  enabled: false
+  repository: "YOUR_SQSD_SERVICE_DOCKER_IMAGE_TAG"
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+  queueName: "WORKER_QUEUE_NAME"
+  # workerHttpHost is set with protocol (http:// | https://)
+  workerHttpHost: "WORKER_HTTP_HOSTNAME"
+  # Worker app endpoint
+  workerHttpPath: "/"
+  workerContentType: "application/json"
+  resources:
+    limits:
+      cpu: 250m
+      memory: 128Mi
+    requests:
+      cpu: 125m
+      memory: 64Mi

@@ -45,11 +45,13 @@ spec:
       stableService: {{ include "kubernetes-service.fullname" . }}-active
       # Reference to a Service which the controller will update to point to the canary ReplicaSet
       canaryService: {{ include "kubernetes-service.fullname" . }}-preview
+      {{- if .Values.ingress.enabled }}
       trafficRouting:
         nginx:
           # Reference to an Ingress which has a rule pointing to the stable service
           # This Ingress will be closed with a new name, in order to achieve NGINX traffic splitting
           stableIngress: {{ include "kubernetes-service.fullname" . }}
+      {{- end }}
       {{- if and ( .Values.rollout.canary.steps ) ( not ( kindIs "string" .Values.rollout.canary.steps ) ) }}
       analysis:
         startingStep: {{ default .Values.rollout.analysis.startingStep 1 }}

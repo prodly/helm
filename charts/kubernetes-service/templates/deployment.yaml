@@ -57,8 +57,10 @@ spec:
         args:
           - name: service-name
             value: {{ include "kubernetes-service.fullname" . }}-preview
+      {{- if .Values.rollout.canary.steps }}
       steps:
         {{- toYaml .Values.rollout.canary.steps | nindent 8 }}
+      {{- end }}
   {{- else if ( default .Values.rollout.blueGreen.enabled false ) }}
     blueGreen:
       # activeService specifies the service to update with the new template hash at time of promotion.

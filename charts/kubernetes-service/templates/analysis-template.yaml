@@ -1,4 +1,4 @@
-{{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+{{- if or ( and ( default .Values.rollout.blueGreen.enabled false ) ( or ( default .Values.rollout.blueGreen.enablePrePromotionAnalysis false ) ( default .Values.rollout.blueGreen.enablePostPromotionAnalysis false ) ) )  ( and ( default .Values.rollout.canary.enabled false ) ( .Values.rollout.canary.steps ) ( not ( kindIs "string" .Values.rollout.canary.steps ) ) ) }}
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:

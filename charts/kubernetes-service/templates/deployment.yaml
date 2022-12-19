@@ -118,6 +118,7 @@ spec:
       annotations:
         "meta.helm.sh/release-name": {{ .Release.Name }}
         "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
+        "ad.datadoghq.com/{{ .Release.Name }}.logs": '[{"source":"{{ .Release.Name }}","service":"{{ .Chart.Name }}"}]'
         {{- with .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}

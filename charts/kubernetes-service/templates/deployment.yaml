@@ -118,7 +118,7 @@ spec:
       annotations:
         "meta.helm.sh/release-name": {{ .Release.Name }}
         "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
-        "ad.datadoghq.com/{{ .Release.Name }}.logs": '[{"source":"{{ .Release.Name }}","service":"{{ .Chart.Name }}","log_processing_rules":[{"type":"multi_line","name":"log_starts_with_date","pattern":"\d{2}-\w{3}-\d{4}\s\d{2}:\d{2}:\d{2}\.\d{3}"}]}]'
+        "ad.datadoghq.com/{{ .Release.Name }}.logs": '[{"source":"{{ .Release.Name }}","service":"{{ .Chart.Name }}","log_processing_rules":[{"type":"multi_line","name":"log_starts_with_date","pattern":"\\d{2}-\\w{3}-\\d{4}\\s\\d{2}:\\d{2}:\\d{2}\\.\\d{3}"}]}]'
         {{- with .Values.podAnnotations }}
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}

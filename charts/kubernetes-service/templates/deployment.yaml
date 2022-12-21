@@ -192,6 +192,10 @@ spec:
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE
               value: {{ .Values.sqsd.workerContentType | quote }}
+            {{- range $key, $val := .Values.sqsd.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
           resources:
             {{- toYaml .Values.sqsd.resources | nindent 12 }}
         {{- end }}

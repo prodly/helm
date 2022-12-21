@@ -199,6 +199,7 @@ sqsd:
   workerHttpPath: "/"
   workerContentType: "application/json"
   # Miscellaneous options
+  env: {}
   securityContext: {}
   resources:
     limits:

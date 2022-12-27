@@ -25,8 +25,8 @@ metadata:
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}
     "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
-    {{- with .Values.ingress.annotations }}
-    {{- toYaml . | nindent 4 }}
+    {{- range $key, $val := .Values.ingress.annotations }}
+    {{ $key }}: {{ $val | quote }}
     {{- end }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}

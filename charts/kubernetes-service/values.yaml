@@ -15,6 +15,9 @@ replicaCount: 1
 # It is recommended to use it with quotes.
 appVersion: "1.0.0"
 
+# Defines which larger functionality is current deployment a part of
+partOf: ""
+
 # This section describes Docker image properties for your service
 image:
   repository: "YOUR_SERVICE_DOCKER_IMAGE_TAG"
@@ -35,7 +38,7 @@ service:
     initialDelaySeconds: 30
     periodSeconds: 30
 
-env: {}
+env: { }
 
 efs:
   enabled: false
@@ -47,7 +50,7 @@ serviceAccount: ""
 ingress:
   enabled: true
   className: "nginx"
-  annotations: {}
+  annotations: { }
   hosts:
     - host: "YOUR_SERVICE_EXTERNAL_HOST_NAME_FROM_ROUTE_53"
       paths:
@@ -136,7 +139,7 @@ rollout:
     startingStep: 1
 
   # Extra AnalysisTemplate objects
-  extraAnalysisTemplates: {}
+  extraAnalysisTemplates: { }
 
 # https://kubernetes.io/docs/tasks/run-application/configure-pdb/
 #
@@ -179,13 +182,13 @@ disruptionBudget:
 #                  - "kubernetes-service"
 #          topologyKey: "kubernetes.io/hostname"
 
-podAnnotations: {}
-imagePullSecrets: {}
-podSecurityContext: {}
-securityContext: {}
-nodeSelector: {}
-affinity: {}
-tolerations: {}
+podAnnotations: { }
+imagePullSecrets: { }
+podSecurityContext: { }
+securityContext: { }
+nodeSelector: { }
+affinity: { }
+tolerations: { }
 
 # Section that enables SQS daemon sidecar that reads messages from AWS SQS queue and delivers them via HTTP endpoint
 sqsd:
@@ -199,8 +202,8 @@ sqsd:
   workerHttpPath: "/"
   workerContentType: "application/json"
   # Miscellaneous options
-  env: {}
-  securityContext: {}
+  env: { }
+  securityContext: { }
   resources:
     limits:
       cpu: 250m

@@ -8,6 +8,9 @@ on:
       - '**.md'
       - '**/CODEOWNERS'
 
+env:
+  GITLEAKS_VERSION: 8.15.3
+
 jobs:
   build:
     permissions:

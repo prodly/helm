@@ -19,6 +19,26 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Gitleaks cache
+        id: cache-gitleaks
+        uses: actions/cache@v3
+        with:
+          path: /tmp/gitleaks
+          key: ${{ runner.os }}-gitleaks-${GITLEAKS_VERSION}
+          restore-keys: |
+            ${{ runner.os }}-gitleaks-${GITLEAKS_VERSION}
+            ${{ runner.os }}-gitleaks-
+
+      - name: Download GitLeaks
+        if: ${{ steps.cache-gitleaks.outputs.cache-hit != 'true' }}
+        run: |
+          wget https://github.com/zricethezav/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
+          mkdir /tmp/gitleaks
+          tar -xf gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz -C /tmp/gitleaks
+
+      - name: Run GitLeaks check
+        run: /tmp/gitleaks/gitleaks detect --verbose
+
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"

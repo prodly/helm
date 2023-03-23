@@ -38,6 +38,9 @@ app.kubernetes.io/version: {{ .Values.appVersion | quote }}
 app.kubernetes.io/part-of: {{ .Values.partOf | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+tags.datadoghq.com/env: {{ .Release.Namespace }}
+tags.datadoghq.com/service: {{ .Release.Name }}
+tags.datadoghq.com/version: {{ .Values.appVersion }}
 {{- end }}
 
 {{/*

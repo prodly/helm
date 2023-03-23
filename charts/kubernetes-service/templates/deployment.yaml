@@ -158,14 +158,20 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: DD_ENV
-              value: {{ .Release.Namespace }}
-            - name: DD_VERSION
-              value: {{ .Values.appVersion }}
-            - name: DD_SERVICE
-              value: {{ .Release.Name }}
             - name: PORT
               value: {{ .Values.service.port | quote }}
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
             - name: SERVER_SERVLET_CONTEXT_PATH
               value: '/{{ .Values.service.path }}'
             {{- if kindIs "map" .Values.env }}

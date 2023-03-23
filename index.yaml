@@ -2,6 +2,15 @@ apiVersion: v1
 entries:
   kubernetes-service:
   - apiVersion: v2
+    created: "2023-03-23T11:57:53.421500816Z"
+    description: General Helm chart for services deployed in Kubernetes
+    digest: 24db34d1eca0b0d0b384897c93434522d5e4dd4949701499ba0cc55de15e15d1
+    name: kubernetes-service
+    type: application
+    urls:
+    - https://github.com/prodly/helm/releases/download/kubernetes-service-1.0.75/kubernetes-service-1.0.75.tgz
+    version: 1.0.75
+  - apiVersion: v2
     created: "2023-03-23T11:22:01.132250237Z"
     description: General Helm chart for services deployed in Kubernetes
     digest: 633007ad7f860b1a23059b8b326aca1c1062e693e3b788c588b790beae6e1e2c
@@ -676,4 +685,4 @@ entries:
     urls:
     - https://github.com/prodly/helm/releases/download/kubernetes-service-1.0.0/kubernetes-service-1.0.0.tgz
     version: 1.0.0
-generated: "2023-03-23T11:22:01.133223532Z"
+generated: "2023-03-23T11:57:53.422314933Z"

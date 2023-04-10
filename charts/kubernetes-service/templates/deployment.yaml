@@ -180,7 +180,10 @@ spec:
               value: {{ $val | quote }}
             {{- end }}
             {{- else }}
-            {{- toYaml .Values.env | nindent 12 }}
+            {{- range $index, $val := .Values.env }}
+            - name: {{ $val.name }}
+              value: {{ $val.value | quote }}
+            {{- end }}
             {{- end }}
           {{- if .Values.efs.enabled }}
           volumeMounts:

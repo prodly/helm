@@ -33,10 +33,16 @@ service:
   customHealthCheckPath: ""
   livenessProbe:
     initialDelaySeconds: 30
+    timeoutSeconds: 1
     periodSeconds: 30
+    successThreshold: 1
+    failureThreshold: 3
   readinessProbe:
     initialDelaySeconds: 30
+    timeoutSeconds: 1
     periodSeconds: 30
+    successThreshold: 1
+    failureThreshold: 3
 
 env: { }
 

@@ -148,13 +148,19 @@ spec:
               path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health" .Values.service.path) }}'
               port: {{ .Values.service.port }}
             initialDelaySeconds: {{ .Values.service.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.livenessProbe.timeoutSeconds }}
             periodSeconds: {{ .Values.service.livenessProbe.periodSeconds }}
+            successThreshold: {{ .Values.service.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.service.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
               path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health" .Values.service.path) }}'
               port: {{ .Values.service.port }}
             initialDelaySeconds: {{ .Values.service.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.readinessProbe.timeoutSeconds }}
             periodSeconds: {{ .Values.service.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.service.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.service.readinessProbe.failureThreshold }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:

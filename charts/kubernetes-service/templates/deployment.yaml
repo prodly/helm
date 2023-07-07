@@ -178,6 +178,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['tags.datadoghq.com/version']
+            - name: APPLICATION_PART_OF
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/part-of']
             - name: SERVER_SERVLET_CONTEXT_PATH
               value: '/{{ .Values.service.path }}'
             {{- if kindIs "map" .Values.env }}

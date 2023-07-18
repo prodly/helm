@@ -77,6 +77,12 @@ autoscaling:
   maxReplicas: 1
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
+#  behavior:
+#    scaleDown:
+#      policies:
+#        - type: Percent
+#          value: 10
+#          periodSeconds: 60
 
 # Defines variety of rollout strategies Kubernetes can offer alongside with ArgoCD
 rollout:

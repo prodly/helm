@@ -31,6 +31,10 @@ Common labels
 {{- define "kubernetes-service.labels" -}}
 helm.sh/chart: {{ include "kubernetes-service.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if .Values.appVersion }}
+app.kubernetes.io/version: {{ .Values.appVersion | quote }}
+tags.datadoghq.com/version: {{ .Values.appVersion | quote }}
+{{- end }}
 {{ include "kubernetes-service.selectorLabels" . }}
 {{- end }}
 
@@ -42,10 +46,6 @@ app.kubernetes.io/name: {{ .Release.Name }}
 app.kubernetes.io/instance: {{ include "kubernetes-service.name" . }}
 tags.datadoghq.com/env: {{ .Release.Namespace | quote }}
 tags.datadoghq.com/service: {{ .Release.Name | quote }}
-{{- if .Values.appVersion }}
-app.kubernetes.io/version: {{ .Values.appVersion | quote }}
-tags.datadoghq.com/version: {{ .Values.appVersion | quote }}
-{{- end }}
 {{- if .Values.partOf }}
 app.kubernetes.io/part-of: {{ .Values.partOf | quote }}
 {{- end }}

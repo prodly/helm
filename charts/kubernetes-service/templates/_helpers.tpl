@@ -52,6 +52,15 @@ app.kubernetes.io/part-of: {{ .Values.partOf | quote }}
 {{- end }}
 
 {{/*
+Version labels
+*/}}
+{{- define "kubernetes-service.versionLabels" -}}
+{{- if .Values.appVersion }}
+app.kubernetes.io/version: {{ .Values.appVersion | quote }}
+tags.datadoghq.com/version: {{ .Values.appVersion | quote }}
+{{- end }}
+{{- end }}
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "kubernetes-service.serviceAccountName" -}}

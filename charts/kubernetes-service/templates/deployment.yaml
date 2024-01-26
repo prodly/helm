@@ -189,7 +189,7 @@ spec:
             {{- else }}
             {{- range $index, $val := .Values.env }}
             - name: {{ $val.name }}
-              {{- if $val.value }}
+              {{- if ( hasKey $val "value" ) }}
               value: {{ $val.value | quote }}
               {{- else }}
               valueFrom:

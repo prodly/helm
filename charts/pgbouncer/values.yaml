@@ -28,7 +28,7 @@ databases:
     user: pgbouncer
     dbname: appopsdb
     auth_user: pgbouncer
-    password: testpassword123
+    password: 
 
 
 # list of users to connect to database, You can get by running this query

@@ -38,6 +38,15 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
+    {{- if .Values.autoscaling.targetQuartzQueueLength }}
+    - type: External
+      External:
+        metric:
+          name: {{ printf "datadogmetric@%s:%s-quartz-queue-%s" .Release.Namespace .Release.Name .Release.Namespace }}
+        target:
+          type: Value
+          value: {{ .Values.autoscaling.targetQuartzQueueLength }}
+    {{- end }}
   {{- with .Values.autoscaling.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}

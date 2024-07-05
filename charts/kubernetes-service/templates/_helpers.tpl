@@ -70,3 +70,15 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Trim -background from service name if required ie: metadata-background-service
+*/}}
+{{- define "kubernetes-service.trimSuffixBackground" -}}
+{{- $name := . -}}
+{{- if hasSuffix "-background" $name -}}
+{{- $name | trimSuffix "-background" -}}
+{{- else -}}
+{{- $name -}}
+{{- end -}}
+{{- end -}}

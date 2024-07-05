@@ -1,0 +1,9 @@
+{{- if .Values.autoscaling.targetQuartzQueueLength }}
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogMetric
+metadata:
+  name: {{ printf "%s-quartz-queue-%s" .Release.Name .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  query: {{ printf "max:quartz.queue{env:%s, service:%s}.rollup(60)" .Release.Namespace .Release.Name }}
+{{- end }}

@@ -40,7 +40,7 @@ spec:
     {{- end }}
     {{- if .Values.autoscaling.targetQuartzQueueLength }}
     - type: External
-      External:
+      external:
         metric:
           name: {{ printf "datadogmetric@%s:%s-quartz-queue-%s" .Release.Namespace .Release.Name .Release.Namespace }}
         target:

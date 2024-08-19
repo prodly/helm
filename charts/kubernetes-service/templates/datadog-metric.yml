@@ -2,7 +2,7 @@
 apiVersion: datadoghq.com/v1alpha1
 kind: DatadogMetric
 metadata:
-  name: {{ printf "%s-quartz-queue-%s" .Release.Name .Release.Namespace }}
+  name: {{ printf "%s-quartz-queue" .Release.Name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}

@@ -42,7 +42,7 @@ spec:
     - type: External
       external:
         metric:
-          name: {{ printf "datadogmetric@%s:%s-quartz-queue-%s" .Release.Namespace .Release.Name .Release.Namespace }}
+          name: {{ printf "datadogmetric@%s:%s-quartz-queue" .Release.Namespace .Release.Name }}
         target:
           type: Value
           value: {{ .Values.autoscaling.targetQuartzQueueLength }}

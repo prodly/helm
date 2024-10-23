@@ -149,7 +149,7 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health" .Values.service.path) }}'
+              path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health/liveness" .Values.service.path) }}'
               port: {{ .Values.service.port }}
             initialDelaySeconds: {{ .Values.service.livenessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.service.livenessProbe.timeoutSeconds }}
@@ -158,7 +158,7 @@ spec:
             failureThreshold: {{ .Values.service.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health" .Values.service.path) }}'
+              path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health/readiness" .Values.service.path) }}'
               port: {{ .Values.service.port }}
             initialDelaySeconds: {{ .Values.service.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.service.readinessProbe.timeoutSeconds }}

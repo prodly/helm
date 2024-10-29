@@ -57,7 +57,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: node.kubernetes.io/lifecycle
+                  - key: node.kubernetes.io/capacity-type
                     operator: In
                     values:
                       - spot

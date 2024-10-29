@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: {{ include "kubernetes-service.fullname" . }}
+  name: {{ include "kubernetes-service-daemonset.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}
     "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
   labels:
-    {{- include "kubernetes-service.labels" . | nindent 4 }}
+    {{- include "kubernetes-service-daemonset.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      {{- include "kubernetes-service.selectorLabels" . | nindent 6 }}
+      {{- include "kubernetes-service-daemonset.selectorLabels" . | nindent 6 }}
 
   template:
     metadata:
@@ -22,8 +22,8 @@ spec:
         {{- toYaml .Values.podAnnotations | nindent 8 }}
         {{- end }}
       labels:
-        {{- include "kubernetes-service.selectorLabels" . | nindent 8 }}
-        {{- include "kubernetes-service.versionLabels" . | nindent 8 }}
+        {{- include "kubernetes-service-daemonset.selectorLabels" . | nindent 8 }}
+        {{- include "kubernetes-service-daemonset.versionLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

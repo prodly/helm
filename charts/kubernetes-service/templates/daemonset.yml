@@ -12,14 +12,7 @@ spec:
   selector:
     matchLabels:
       {{- include "kubernetes-service.selectorLabels" . | nindent 6 }}
-  updateStrategy:
-    type: {{ .Values.daemonset.updateStrategy.type | default "RollingUpdate" }}
-    {{- if eq (.Values.daemonset.updateStrategy.type | default "RollingUpdate") "RollingUpdate" }}
-    rollingUpdate:
-      {{- if .Values.daemonset.updateStrategy.maxUnavailable }}
-      maxUnavailable: {{ .Values.daemonset.updateStrategy.maxUnavailable }}
-      {{- end }}
-    {{- end }}
+
   template:
     metadata:
       annotations:
@@ -30,7 +23,7 @@ spec:
         {{- end }}
       labels:
         {{- include "kubernetes-service.selectorLabels" . | nindent 8 }}
-          {{- include "kubernetes-service.versionLabels" . | nindent 8 }}
+        {{- include "kubernetes-service.versionLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -45,14 +38,14 @@ spec:
       restartPolicy: {{ .Values.restartPolicy | default "Always" }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if or .Values.affinity .Values.daemonset.affinity }}
+      {{- if or .Values.affinity }}
       affinity:
-        {{- if .Values.daemonset.affinity }}
-          {{- toYaml .Values.daemonset.affinity | nindent 8 }}
+        {{- if .Values.affinity }}
+          {{- toYaml .Values.affinity | nindent 8 }}
           {{- else }}
           {{- toYaml .Values.affinity | nindent 8 }}
           {{- end }}
-      {{- else if .Values.daemonset.runOnSpotOnly }}
+      {{- else if .Values.runOnSpotOnly }}
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:

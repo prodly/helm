@@ -1,4 +1,4 @@
-{{- if eq .Values.deploymentModes.deployment true }}
+{{- if eq .Values.deployment.type "Deployment" }}
 {{/* Ensuring that only one deployment strategy was enabled by user */}}
 {{- $multipleRolloutsRequested := 0 -}}
 {{- range list ( default .Values.rollout.recreate.enabled false ) ( default .Values.rollout.rollingUpdate.enabled false ) ( default .Values.rollout.canary.enabled false ) ( default .Values.rollout.blueGreen.enabled false ) -}}

@@ -23,6 +23,25 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
+# This section describes properties of your service itself
+service:
+  type: NodePort
+  port: "YOUR_SERVICE_PORT"
+  path: "YOUR_SERVICE_CONTEXT_PATH"
+  customHealthCheckPath: ""
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+    periodSeconds: 30
+    successThreshold: 1
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+    periodSeconds: 30
+    successThreshold: 1
+    failureThreshold: 3
+
 env: { }
 
 efs:
@@ -31,16 +50,6 @@ efs:
 
 # Permissions section
 serviceAccount: ""
-
-ingress:
-  enabled: true
-  className: "nginx"
-  annotations: { }
-  hosts:
-    - host: "YOUR_SERVICE_EXTERNAL_HOST_NAME_FROM_ROUTE_53"
-      paths:
-        - path: "/YOUR_SERVICE_CONTEXT_PATH"
-          pathType: Prefix
 
 resources:
   limits:

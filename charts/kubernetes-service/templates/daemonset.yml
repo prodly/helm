@@ -1,0 +1,147 @@
+{{- if eq .Values.deployment.type "DaemonSet" }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "kubernetes-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
+  labels:
+    {{- include "kubernetes-service.labels" . | nindent 4 }}
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+  selector:
+    matchLabels:
+      {{- include "kubernetes-service.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      annotations:
+        "meta.helm.sh/release-name": {{ .Release.Name }}
+        "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "kubernetes-service.selectorLabels" . | nindent 8 }}
+        {{- include "kubernetes-service.versionLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount }}
+      serviceAccountName: {{ .Values.serviceAccount }}
+      {{- end }}
+      {{- if .Values.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- end }}
+      restartPolicy: {{ .Values.restartPolicy | default "Always" }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if or .Values.affinity }}
+      affinity:
+        {{- if .Values.affinity }}
+          {{- toYaml .Values.affinity | nindent 8 }}
+          {{- else }}
+          {{- toYaml .Values.affinity | nindent 8 }}
+          {{- end }}
+      {{- else if .Values.runOnSpotOnly }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.kubernetes.io/lifecycle
+                    operator: In
+                    values:
+                      - spot
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Values.appVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health/liveness" .Values.service.path) }}'
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.service.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.service.livenessProbe.periodSeconds }}
+            successThreshold: {{ .Values.service.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.service.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: '{{ .Values.service.customHealthCheckPath | default ( printf "%s/actuator/health/readiness" .Values.service.path) }}'
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: {{ .Values.service.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.service.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.service.readinessProbe.periodSeconds }}
+            successThreshold: {{ .Values.service.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.service.readinessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
+            - name: SERVER_SERVLET_CONTEXT_PATH
+              value: '/{{ .Values.service.path }}'
+            {{- if kindIs "map" .Values.env }}
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- else }}
+            {{- range $index, $val := .Values.env }}
+            - name: {{ $val.name }}
+              {{- if ( hasKey $val "value" ) }}
+              value: {{ $val.value | quote }}
+              {{- else }}
+              valueFrom:
+              {{- toYaml $val.valueFrom | nindent 16 -}}
+              {{- end }}
+            {{- end }}
+            {{- end }}
+          {{- if .Values.efs.enabled }}
+          volumeMounts:
+            - name: efs-share
+              mountPath: /mnt/efs
+          {{- end}}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.efs.enabled }}
+      volumes:
+        - name: efs-share
+          persistentVolumeClaim:
+            claimName: {{ .Values.efs.claimName }}
+      {{- end }}
+{{- end }}

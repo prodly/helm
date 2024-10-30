@@ -51,17 +51,6 @@ spec:
           {{- else }}
           {{- toYaml .Values.affinity | nindent 8 }}
           {{- end }}
-      {{- else if .Values.runOnSpotOnly }}
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: node.kubernetes.io/capacity-type
-                    operator: In
-                    values:
-                      - spot
-      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

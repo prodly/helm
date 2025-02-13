@@ -58,7 +58,7 @@ serviceAccount: ""
 
 ingress:
   enabled: true
-  className: "nginx"
+  className: "public-ingress"
   annotations: { }
   hosts:
     - host: "YOUR_SERVICE_EXTERNAL_HOST_NAME_FROM_ROUTE_53"

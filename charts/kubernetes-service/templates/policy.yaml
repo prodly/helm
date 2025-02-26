@@ -15,9 +15,5 @@ spec:
 {{- end }}
   selector:
     matchLabels:
-      {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
-      app.kubernetes.io/name: {{ include "kubernetes-service.fullname" . }}-active
-      {{- else }}
       app.kubernetes.io/name: {{ include "kubernetes-service.fullname" . }}
-      {{- end }}
 {{- end }}

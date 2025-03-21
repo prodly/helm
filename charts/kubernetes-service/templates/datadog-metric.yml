@@ -7,5 +7,7 @@ metadata:
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
+  maxAge: "5m"
+  timeWindow: "120s"
   query: {{ printf "max:quartz.queue{env:%s, service:%s}.rollup(60)" .Release.Namespace .Release.Name }}
 {{- end }}

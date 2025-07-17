@@ -1,15 +1,34 @@
+{{/* Define service names - same logic as deployment */}}
+{{- $serviceName := include "kubernetes-service.fullname" . -}}
+{{- $activeServiceName := $serviceName -}}
+{{- $previewServiceName := printf "%s-preview" $serviceName -}}
+
+{{/* Override service names based on configuration */}}
+{{- if or .Values.rollout.blueGreen.enabled .Values.rollout.canary.enabled -}}
+  {{- if .Values.rollout.blueGreen.activeService -}}
+    {{/* Use explicitly defined active service name from blueGreen config */}}
+    {{- $activeServiceName = .Values.rollout.blueGreen.activeService -}}
+  {{- else if .Values.rollout.canary.activeService -}}
+    {{/* Use explicitly defined active service name from canary config */}}
+    {{- $activeServiceName = .Values.rollout.canary.activeService -}}
+  {{- else if not .Values.rollout.useBaseServiceName -}}
+    {{/* Default behavior: add -active suffix */}}
+    {{- $activeServiceName = printf "%s-active" $serviceName -}}
+  {{- end -}}
+
+  {{- if .Values.rollout.blueGreen.previewService -}}
+    {{/* Use explicitly defined preview service name from blueGreen config */}}
+    {{- $previewServiceName = .Values.rollout.blueGreen.previewService -}}
+  {{- else if .Values.rollout.canary.previewService -}}
+    {{/* Use explicitly defined preview service name from canary config */}}
+    {{- $previewServiceName = .Values.rollout.canary.previewService -}}
+  {{- end -}}
+{{- end -}}
+
 apiVersion: v1
 kind: Service
 metadata:
-  {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
-  {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
-  name: {{ include "kubernetes-service.fullname" . }}
-  {{- else }}
-  name: {{ include "kubernetes-service.fullname" . }}-active
-  {{- end }}
-  {{- else }}
-  name: {{ include "kubernetes-service.fullname" . }}
-  {{- end }}
+  name: {{ $activeServiceName }}
   namespace: {{ .Release.Namespace }}
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}
@@ -30,7 +49,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "kubernetes-service.fullname" . }}-preview
+  name: {{ $previewServiceName }}
   namespace: {{ .Release.Namespace }}
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}

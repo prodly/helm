@@ -1,14 +1,22 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := "to-be-defined" }}
-{{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
-{{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
-{{- $fullName = include "kubernetes-service.fullname" . -}}
-{{- else }}
-{{- $fullName = printf "%s-%s" ( include "kubernetes-service.fullname" . ) "active" -}}
-{{- end }}
-{{- else }}
-{{- $fullName = include "kubernetes-service.fullname" . -}}
-{{- end }}
+{{/* Define service names for ingress - same logic as deployment */}}
+{{- $serviceName := include "kubernetes-service.fullname" . -}}
+{{- $activeServiceName := $serviceName -}}
+
+{{/* Override service names based on configuration */}}
+{{- if or .Values.rollout.blueGreen.enabled .Values.rollout.canary.enabled -}}
+  {{- if .Values.rollout.blueGreen.activeService -}}
+    {{/* Use explicitly defined active service name from blueGreen config */}}
+    {{- $activeServiceName = .Values.rollout.blueGreen.activeService -}}
+  {{- else if .Values.rollout.canary.activeService -}}
+    {{/* Use explicitly defined active service name from canary config */}}
+    {{- $activeServiceName = .Values.rollout.canary.activeService -}}
+  {{- else if not .Values.rollout.useBaseServiceName -}}
+    {{/* Default behavior: add -active suffix */}}
+    {{- $activeServiceName = printf "%s-active" $serviceName -}}
+  {{- end -}}
+{{- end -}}
+
 {{- $svcPort := .Values.service.port -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
@@ -61,11 +69,11 @@ spec:
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
-                name: {{ $fullName }}
+                name: {{ $activeServiceName }}
                 port:
                   number: {{ $svcPort }}
               {{- else }}
-              serviceName: {{ $fullName }}
+              serviceName: {{ $activeServiceName }}
               servicePort: {{ $svcPort }}
               {{- end }}
           {{- end }}

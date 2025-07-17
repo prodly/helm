@@ -11,6 +11,33 @@
 {{- fail "Cannot enable multiple deployment strategies, please, pick only one" -}}
 {{- end -}}
 
+{{/* Define service names for rollout strategies */}}
+{{- $serviceName := include "kubernetes-service.fullname" . -}}
+{{- $activeServiceName := $serviceName -}}
+{{- $previewServiceName := printf "%s-preview" $serviceName -}}
+
+{{/* Override service names based on configuration */}}
+{{- if or .Values.rollout.blueGreen.enabled .Values.rollout.canary.enabled -}}
+  {{- if .Values.rollout.blueGreen.activeService -}}
+    {{/* Use explicitly defined active service name from blueGreen config */}}
+    {{- $activeServiceName = .Values.rollout.blueGreen.activeService -}}
+  {{- else if .Values.rollout.canary.activeService -}}
+    {{/* Use explicitly defined active service name from canary config */}}
+    {{- $activeServiceName = .Values.rollout.canary.activeService -}}
+  {{- else if not .Values.rollout.useBaseServiceName -}}
+    {{/* Default behavior: add -active suffix */}}
+    {{- $activeServiceName = printf "%s-active" $serviceName -}}
+  {{- end -}}
+
+  {{- if .Values.rollout.blueGreen.previewService -}}
+    {{/* Use explicitly defined preview service name from blueGreen config */}}
+    {{- $previewServiceName = .Values.rollout.blueGreen.previewService -}}
+  {{- else if .Values.rollout.canary.previewService -}}
+    {{/* Use explicitly defined preview service name from canary config */}}
+    {{- $previewServiceName = .Values.rollout.canary.previewService -}}
+  {{- end -}}
+{{- end -}}
+
 {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
@@ -43,13 +70,9 @@ spec:
       maxSurge: {{ .Values.rollout.rollingUpdate.maxSurge }}
       {{- end }}
       # Reference to a Service which the controller will update to point to the stable ReplicaSet
-      {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
-      stableService: {{ include "kubernetes-service.fullname" . }}
-      {{- else }}
-      stableService: {{ include "kubernetes-service.fullname" . }}-active
-      {{- end }}
+      stableService: {{ $activeServiceName }}
       # Reference to a Service which the controller will update to point to the canary ReplicaSet
-      canaryService: {{ include "kubernetes-service.fullname" . }}-preview
+      canaryService: {{ $previewServiceName }}
       {{- if .Values.ingress.enabled }}
       trafficRouting:
         nginx:
@@ -64,7 +87,7 @@ spec:
           - templateName: {{ include "kubernetes-service.fullname" . }}-success-rate
         args:
           - name: service-name
-            value: {{ include "kubernetes-service.fullname" . }}-preview
+            value: {{ $previewServiceName }}
       steps:
         {{- toYaml .Values.rollout.canary.steps | nindent 8 }}
       {{- end }}
@@ -72,15 +95,11 @@ spec:
     blueGreen:
       # activeService specifies the service to update with the new template hash at time of promotion.
       # This field is mandatory for the blueGreen update strategy.
-      {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
-      activeService: {{ include "kubernetes-service.fullname" . }}
-      {{- else }}
-      activeService: {{ include "kubernetes-service.fullname" . }}-active
-      {{- end }}
+      activeService: {{ $activeServiceName }}
       # previewService specifies the service to update with the new template hash before promotion.
       # This allows the preview stack to be reachable without serving production traffic.
       # This field is optional.
-      previewService: {{ include "kubernetes-service.fullname" . }}-preview
+      previewService: {{ $previewServiceName }}
       autoPromotionEnabled: {{ if (eq ( default "false" ( .Values.rollout.blueGreen.autoPromotionEnabled | toString | lower ) ) "false") }}false{{ else }}true{{ end }}
       {{- if .Values.rollout.blueGreen.autoPromotionSeconds }}
       autoPromotionSeconds: {{ .Values.rollout.blueGreen.autoPromotionSeconds }}
@@ -100,7 +119,7 @@ spec:
           - templateName: {{ include "kubernetes-service.fullname" . }}-success-rate
         args:
           - name: service-name
-            value: {{ include "kubernetes-service.fullname" . }}-preview
+            value: {{ $previewServiceName }}
       {{- end }}
       {{- if .Values.rollout.blueGreen.enablePostPromotionAnalysis }}
       postPromotionAnalysis:
@@ -108,7 +127,7 @@ spec:
           - templateName: {{ include "kubernetes-service.fullname" . }}-success-rate
         args:
           - name: service-name
-            value: {{ include "kubernetes-service.fullname" . }}-preview
+            value: {{ $previewServiceName }}
       {{- end }}
   {{- else if ( default .Values.rollout.recreate.enabled false ) }}
     type: Recreate
@@ -224,18 +243,8 @@ spec:
           env:
             - name: SQSD_QUEUE_NAME
               value: {{ .Values.sqsd.queueName | quote }}
-            {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
-            {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
             - name: SQSD_WORKER_HTTP_HOST
-              value: 'http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}'
-            {{- else }}
-            - name: SQSD_WORKER_HTTP_HOST
-              value: 'http://{{ include "kubernetes-service.fullname" . }}-active.{{ .Release.Namespace }}:{{ .Values.service.port }}'
-            {{- end }}
-            {{- else }}
-            - name: SQSD_WORKER_HTTP_HOST
-              value: 'http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}'
-            {{- end }}
+              value: 'http://{{ $activeServiceName }}.{{ .Release.Namespace }}:{{ .Values.service.port }}'
             - name: SQSD_WORKER_HTTP_PATH
               value: {{ .Values.sqsd.workerHttpPath | quote }}
             - name: SQSD_WORKER_HTTP_REQUEST_CONTENT_TYPE

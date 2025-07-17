@@ -43,7 +43,11 @@ spec:
       maxSurge: {{ .Values.rollout.rollingUpdate.maxSurge }}
       {{- end }}
       # Reference to a Service which the controller will update to point to the stable ReplicaSet
+      {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
+      stableService: {{ include "kubernetes-service.fullname" . }}
+      {{- else }}
       stableService: {{ include "kubernetes-service.fullname" . }}-active
+      {{- end }}
       # Reference to a Service which the controller will update to point to the canary ReplicaSet
       canaryService: {{ include "kubernetes-service.fullname" . }}-preview
       {{- if .Values.ingress.enabled }}
@@ -68,7 +72,11 @@ spec:
     blueGreen:
       # activeService specifies the service to update with the new template hash at time of promotion.
       # This field is mandatory for the blueGreen update strategy.
+      {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
+      activeService: {{ include "kubernetes-service.fullname" . }}
+      {{- else }}
       activeService: {{ include "kubernetes-service.fullname" . }}-active
+      {{- end }}
       # previewService specifies the service to update with the new template hash before promotion.
       # This allows the preview stack to be reachable without serving production traffic.
       # This field is optional.
@@ -217,8 +225,13 @@ spec:
             - name: SQSD_QUEUE_NAME
               value: {{ .Values.sqsd.queueName | quote }}
             {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+            {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
+            - name: SQSD_WORKER_HTTP_HOST
+              value: 'http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}'
+            {{- else }}
             - name: SQSD_WORKER_HTTP_HOST
               value: 'http://{{ include "kubernetes-service.fullname" . }}-active.{{ .Release.Namespace }}:{{ .Values.service.port }}'
+            {{- end }}
             {{- else }}
             - name: SQSD_WORKER_HTTP_HOST
               value: 'http://{{ include "kubernetes-service.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.service.port }}'

@@ -2,7 +2,11 @@ apiVersion: v1
 kind: Service
 metadata:
   {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+  {{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
+  name: {{ include "kubernetes-service.fullname" . }}
+  {{- else }}
   name: {{ include "kubernetes-service.fullname" . }}-active
+  {{- end }}
   {{- else }}
   name: {{ include "kubernetes-service.fullname" . }}
   {{- end }}

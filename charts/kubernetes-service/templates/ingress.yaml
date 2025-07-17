@@ -1,7 +1,11 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := "to-be-defined" }}
 {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+{{- if eq (include "kubernetes-service.fullname" .) "appops-release-parent" }}
+{{- $fullName = include "kubernetes-service.fullname" . -}}
+{{- else }}
 {{- $fullName = printf "%s-%s" ( include "kubernetes-service.fullname" . ) "active" -}}
+{{- end }}
 {{- else }}
 {{- $fullName = include "kubernetes-service.fullname" . -}}
 {{- end }}

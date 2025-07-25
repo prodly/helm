@@ -1,4 +1,5 @@
-{{- if .Values.autoscaling.targetQuartzQueueLength }}
+{{- if (or .Values.autoscaling.targetQuartzQueueLength
+           .Values.autoscaling.targetQuartzJobsPerPod) }}
 apiVersion: datadoghq.com/v1alpha1
 kind: DatadogMetric
 metadata:

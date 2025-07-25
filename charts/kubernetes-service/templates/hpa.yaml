@@ -47,6 +47,16 @@ spec:
           type: Value
           value: {{ .Values.autoscaling.targetQuartzQueueLength }}
     {{- end }}
+    # desiredReplicas = ceil( currentReplicas × currentMetric / targetQuartzJobsPerPod )
+    {{- if .Values.autoscaling.targetQuartzJobsPerPod }}
+    - type: External
+      external:
+        metric:
+          name: {{ printf "datadogmetric@%s:%s-quartz-queue" .Release.Namespace .Release.Name }}
+        target:
+          type: AverageValue
+          value: {{ .Values.autoscaling.targetQuartzJobsPerPod }}
+    {{- end }}
   {{- with .Values.autoscaling.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}

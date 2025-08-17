@@ -211,6 +211,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['tags.datadoghq.com/version']
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
             - name: SERVER_SERVLET_CONTEXT_PATH
               value: '/{{ .Values.service.path }}'
             {{- if kindIs "map" .Values.env }}

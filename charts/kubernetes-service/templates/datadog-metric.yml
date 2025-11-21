@@ -10,3 +10,15 @@ metadata:
 spec:
   query: {{ printf "max:quartz.queue{env:%s, service:%s}.rollup(60)" .Release.Namespace .Release.Name }}
 {{- end }}
+{{- range $index, $queue := .Values.autoscaling.sqs }}
+---
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogMetric
+metadata:
+  name: {{ printf "%s-sqs-queue-%d" $.Release.Name $index }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "kubernetes-service.labels" $ | nindent 4 }}
+spec:
+  query: {{ printf "max:aws.sqs.approximate_number_of_messages_visible{queuename:%s}.rollup(60)" $queue.queueName }}
+{{- end }}

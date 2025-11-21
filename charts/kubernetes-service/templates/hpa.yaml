@@ -57,6 +57,15 @@ spec:
           type: AverageValue
           value: {{ .Values.autoscaling.targetQuartzJobsPerPod }}
     {{- end }}
+    {{- range $index, $queue := .Values.autoscaling.sqs }}
+    - type: External
+      external:
+        metric:
+          name: {{ printf "datadogmetric@%s:%s-sqs-queue-%d" $.Release.Namespace $.Release.Name $index }}
+        target:
+          type: Value
+          value: {{ $queue.targetQueueLength }}
+    {{- end }}
   {{- with .Values.autoscaling.behavior }}
   behavior:
     {{- toYaml . | nindent 4 }}

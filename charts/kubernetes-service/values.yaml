@@ -79,6 +79,10 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 1
   targetCPUUtilizationPercentage: 80
+  targetQuartzQueueLength: ""
+  datadogMetric:
+    maxAge: ""
+    timeWindow: ""
   # targetMemoryUtilizationPercentage: 80
 #  behavior:
 #    scaleDown:

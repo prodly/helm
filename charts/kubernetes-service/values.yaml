@@ -80,6 +80,12 @@ autoscaling:
   maxReplicas: 1
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
+  # SQS queue autoscaling - supports multiple queues
+  # sqs:
+  #   - queueName: "my-primary-queue"
+  #     targetQueueLength: 100  # Scale based on approximate_number_of_messages_visible
+  #   - queueName: "my-secondary-queue"
+  #     targetQueueLength: 50
 #  behavior:
 #    scaleDown:
 #      policies:

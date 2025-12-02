@@ -38,24 +38,24 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
-    {{- if .Values.autoscaling.targetQuartzQueueLength }}
+    {{- if and .Values.autoscaling.quartz .Values.autoscaling.quartz.targetQueueLength }}
     - type: External
       external:
         metric:
           name: {{ printf "datadogmetric@%s:%s-quartz-queue" .Release.Namespace .Release.Name }}
         target:
           type: Value
-          value: {{ .Values.autoscaling.targetQuartzQueueLength }}
+          value: {{ .Values.autoscaling.quartz.targetQueueLength }}
     {{- end }}
-    # desiredReplicas = ceil( currentReplicas × currentMetric / targetQuartzJobsPerPod )
-    {{- if .Values.autoscaling.targetQuartzJobsPerPod }}
+    # desiredReplicas = ceil( currentReplicas × currentMetric / targetJobsPerPod )
+    {{- if and .Values.autoscaling.quartz .Values.autoscaling.quartz.targetJobsPerPod }}
     - type: External
       external:
         metric:
           name: {{ printf "datadogmetric@%s:%s-quartz-queue" .Release.Namespace .Release.Name }}
         target:
           type: AverageValue
-          value: {{ .Values.autoscaling.targetQuartzJobsPerPod }}
+          value: {{ .Values.autoscaling.quartz.targetJobsPerPod }}
     {{- end }}
     {{- range $index, $queue := .Values.autoscaling.sqs }}
     - type: External

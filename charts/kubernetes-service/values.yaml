@@ -80,12 +80,19 @@ autoscaling:
   maxReplicas: 1
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
+  # Quartz queue autoscaling
+  # quartz:
+  #   targetQueueLength: 1  # Optional: Scale based on total queue length (type: Value)
+  #   targetJobsPerPod: 1  # Optional: Scale based on jobs per pod (type: AverageValue)
+  #   maxAge: 10m  # Optional: Max age for DatadogMetric data
   # SQS queue autoscaling - supports multiple queues
   # sqs:
   #   - queueName: "my-primary-queue"
   #     targetQueueLength: 100  # Scale based on approximate_number_of_messages_visible
+  #     maxAge: 10m  # Optional: Max age for DatadogMetric data
   #   - queueName: "my-secondary-queue"
   #     targetQueueLength: 50
+  #     maxAge: 10m
 #  behavior:
 #    scaleDown:
 #      policies:

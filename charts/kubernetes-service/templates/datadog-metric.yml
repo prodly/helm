@@ -1,5 +1,4 @@
-{{- if (or .Values.autoscaling.targetQuartzQueueLength
-           .Values.autoscaling.targetQuartzJobsPerPod) }}
+{{- if and .Values.autoscaling.quartz (or .Values.autoscaling.quartz.targetQueueLength .Values.autoscaling.quartz.targetJobsPerPod) }}
 apiVersion: datadoghq.com/v1alpha1
 kind: DatadogMetric
 metadata:
@@ -9,8 +8,12 @@ metadata:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
   query: {{ printf "max:quartz.queue{env:%s, service:%s}.rollup(60)" .Release.Namespace .Release.Name }}
+  {{- if .Values.autoscaling.quartz.maxAge }}
+  maxAge: {{ .Values.autoscaling.quartz.maxAge }}
+  {{- end }}
 {{- end }}
 {{- range $index, $queue := .Values.autoscaling.sqs }}
+{{- if and $queue.queueName $queue.targetQueueLength }}
 ---
 apiVersion: datadoghq.com/v1alpha1
 kind: DatadogMetric
@@ -21,4 +24,8 @@ metadata:
     {{- include "kubernetes-service.labels" $ | nindent 4 }}
 spec:
   query: {{ printf "max:aws.sqs.approximate_number_of_messages_visible{queuename:%s}.rollup(60)" $queue.queueName }}
+  {{- if $queue.maxAge }}
+  maxAge: {{ $queue.maxAge }}
+  {{- end }}
+{{- end }}
 {{- end }}

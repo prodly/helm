@@ -37,6 +37,10 @@ metadata:
   annotations:
     "meta.helm.sh/release-name": {{ .Release.Name }}
     "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
+    {{- if .Values.ingress.forceHttpsRedirect }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/hsts: "true"
+    {{- end }}
     {{- range $key, $val := .Values.ingress.annotations }}
     {{ $key }}: {{ $val | quote }}
     {{- end }}

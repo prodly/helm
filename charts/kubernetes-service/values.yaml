@@ -239,3 +239,6 @@ sqsd:
     requests:
       cpu: 125m
       memory: 64Mi
+
+otel:
+  enabled: false

@@ -211,7 +211,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['tags.datadoghq.com/version']
-            {{ - if .Values.otel.enabled }}
+            {{- if .Values.otel.enabled }}
             - name: OTEL_LOGS_EXPORTER
               value: 'none'
             - name: OTEL_METRICS_EXPORTER

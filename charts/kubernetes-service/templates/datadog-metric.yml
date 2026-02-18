@@ -1,4 +1,4 @@
-{{- if and .Values.autoscaling.quartz (or .Values.autoscaling.quartz.targetQueueLength .Values.autoscaling.quartz.targetJobsPerPod) }}
+{{- if and .Values.autoscaling.quartz (or .Values.autoscaling.quartz.targetQueueLength .Values.autoscaling.quartz.targetJobsPerPod) (ne (default "hpa" .Values.autoscaling.type) "keda") }}
 apiVersion: datadoghq.com/v1alpha1
 kind: DatadogMetric
 metadata:
@@ -13,7 +13,7 @@ spec:
   {{- end }}
 {{- end }}
 {{- range $index, $queue := .Values.autoscaling.sqs }}
-{{- if and $queue.queueName $queue.targetQueueLength }}
+{{- if and $queue.queueName $queue.targetQueueLength (ne (default "hpa" $.Values.autoscaling.type) "keda") }}
 ---
 apiVersion: datadoghq.com/v1alpha1
 kind: DatadogMetric

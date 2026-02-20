@@ -37,11 +37,14 @@ spec:
         value: {{ .Values.autoscaling.targetMemoryUtilizationPercentage | quote }}
     {{- end }}
     {{- range $index, $queue := .Values.autoscaling.sqs }}
+    {{- if $queue.queueURL }}
     - type: aws-sqs-queue
       metadata:
         queueURL: {{ $queue.queueURL }}
         queueLength: {{ $queue.targetQueueLength | quote }}
         awsRegion: {{ default "us-east-2" $queue.awsRegion }}
+        # Defaults to "operator" for IRSA-based auth on keda-operator service account
         identityOwner: {{ default "operator" $queue.identityOwner }}
+    {{- end }}
     {{- end }}
 {{- end }}

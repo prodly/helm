@@ -1,0 +1,50 @@
+{{- if and .Values.autoscaling.enabled (eq (default "hpa" .Values.autoscaling.type) "keda") }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "kubernetes-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubernetes-service.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    {{- end }}
+    name: {{ include "kubernetes-service.fullname" . }}
+  minReplicaCount: {{ .Values.autoscaling.minReplicas }}
+  maxReplicaCount: {{ .Values.autoscaling.maxReplicas }}
+  pollingInterval: {{ if and .Values.autoscaling.keda .Values.autoscaling.keda.pollingInterval }}{{ .Values.autoscaling.keda.pollingInterval }}{{ else }}30{{ end }}
+  cooldownPeriod: {{ if and .Values.autoscaling.keda .Values.autoscaling.keda.cooldownPeriod }}{{ .Values.autoscaling.keda.cooldownPeriod }}{{ else }}300{{ end }}
+  {{- with .Values.autoscaling.behavior }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
+  triggers:
+    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: {{ .Values.autoscaling.targetCPUUtilizationPercentage | quote }}
+    {{- end }}
+    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: memory
+      metricType: Utilization
+      metadata:
+        value: {{ .Values.autoscaling.targetMemoryUtilizationPercentage | quote }}
+    {{- end }}
+    {{- range $index, $queue := .Values.autoscaling.sqs }}
+    {{- if $queue.queueURL }}
+    - type: aws-sqs-queue
+      metadata:
+        queueURL: {{ $queue.queueURL }}
+        queueLength: {{ $queue.targetQueueLength | quote }}
+        awsRegion: {{ default "us-east-2" $queue.awsRegion }}
+        # Defaults to "operator" for IRSA-based auth on keda-operator service account
+        identityOwner: {{ default "operator" $queue.identityOwner }}
+    {{- end }}
+    {{- end }}
+{{- end }}

@@ -51,10 +51,18 @@ spec:
     {{- end }}
     {{- end }}
     {{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.connection }}
+    {{- $pg := .Values.autoscaling.postgresql }}
+    {{- $query := printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state = 'WAITING' AND to_timestamp((next_fire_time + 5000) / 1000) <= CURRENT_TIMESTAMP" $pg.schema }}
+    {{- if $pg.excludeGroups }}
+    {{- $query = printf "%s AND trigger_group NOT IN ('%s')" $query (join "', '" $pg.excludeGroups) }}
+    {{- end }}
+    {{- if $pg.schedNamePrefix }}
+    {{- $query = printf "%s AND sched_name = '%s-%s'" $query $pg.schedNamePrefix $.Values.appVersion }}
+    {{- end }}
     - type: postgresql
       metadata:
-        query: {{ if .Values.autoscaling.postgresql.schedNamePrefix }}{{ printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state IN ('WAITING', 'ACQUIRED') AND sched_name = '%s-%s'" .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.schedNamePrefix .Values.appVersion | quote }}{{ else }}{{ printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state IN ('WAITING', 'ACQUIRED')" .Values.autoscaling.postgresql.schema | quote }}{{ end }}
-        targetQueryValue: {{ .Values.autoscaling.postgresql.targetQueryValue | default "1" | quote }}
+        query: {{ $query | quote }}
+        targetQueryValue: {{ $pg.targetQueryValue | default "1" | quote }}
       authenticationRef:
         name: {{ printf "%s-postgresql-trigger-auth" (include "kubernetes-service.fullname" .) }}
     {{- end }}

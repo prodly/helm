@@ -1,5 +1,5 @@
 {{- if and .Values.autoscaling.enabled (eq (default "hpa" .Values.autoscaling.type) "keda") }}
-{{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.password }}
+{{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.connection }}
 apiVersion: keda.sh/v1alpha1
 kind: TriggerAuthentication
 metadata:
@@ -9,8 +9,8 @@ metadata:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:
   secretTargetRef:
-    - parameter: password
-      name: {{ .Values.autoscaling.postgresql.password.secretName }}
-      key: {{ .Values.autoscaling.postgresql.password.secretKey }}
+    - parameter: connection
+      name: {{ .Values.autoscaling.postgresql.connection.secretName }}
+      key: {{ .Values.autoscaling.postgresql.connection.secretKey }}
 {{- end }}
 {{- end }}

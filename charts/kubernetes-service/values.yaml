@@ -99,18 +99,14 @@ autoscaling:
   #     maxAge: 10m                        # HPA mode only
   # Quartz queue autoscaling via direct PostgreSQL query (KEDA mode only)
   # Scales based on pending/acquired jobs in the qrtz_triggers table.
-  # Requires a TriggerAuthentication referencing the DB password secret.
+  # Requires a TriggerAuthentication referencing a libpq connection string in a secret.
   # postgresql:
   #   schema: "my_service_dev_1"          # PostgreSQL schema containing qrtz_triggers
-  #   userName: "prodlyuser"              # DB username (inline, not from secret)
-  #   host: "db-host.us-east-2.rds.amazonaws.com"
-  #   port: "5432"                        # Optional, default: 5432
-  #   dbName: "my_database"              # PostgreSQL database name
-  #   sslmode: "require"                 # Optional, default: require
-  #   targetQueryValue: "1"             # Optional, default: 1 (jobs per pod)
-  #   password:
+  #   schedNamePrefix: "my-service-scheduler"  # Optional: filters by sched_name = "{prefix}-{appVersion}"
+  #   targetQueryValue: "1"              # Optional, default: 1 (jobs per pod)
+  #   connection:
   #     secretName: "dev-1-my-service-secret"
-  #     secretKey: "my_service.rds.password"
+  #     secretKey: "keda.postgresql.connection"
   # KEDA-specific settings
   # keda:
   #   pollingInterval: 30   # How often KEDA checks triggers (seconds)

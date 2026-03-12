@@ -50,12 +50,7 @@ spec:
     {{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.schema }}
     - type: postgresql
       metadata:
-        userName: {{ .Values.autoscaling.postgresql.userName }}
-        host: {{ .Values.autoscaling.postgresql.host }}
-        port: {{ .Values.autoscaling.postgresql.port | default "5432" | quote }}
-        dbName: {{ .Values.autoscaling.postgresql.dbName }}
-        sslmode: {{ .Values.autoscaling.postgresql.sslmode | default "require" }}
-        query: {{ printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state IN ('WAITING', 'ACQUIRED')" .Values.autoscaling.postgresql.schema | quote }}
+        query: {{ if .Values.autoscaling.postgresql.schedNamePrefix }}{{ printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state IN ('WAITING', 'ACQUIRED') AND sched_name = '%s-%s'" .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.schedNamePrefix .Values.appVersion | quote }}{{ else }}{{ printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state IN ('WAITING', 'ACQUIRED')" .Values.autoscaling.postgresql.schema | quote }}{{ end }}
         targetQueryValue: {{ .Values.autoscaling.postgresql.targetQueryValue | default "1" | quote }}
       authenticationRef:
         name: {{ printf "%s-postgresql-trigger-auth" (include "kubernetes-service.fullname" .) }}

@@ -11,6 +11,9 @@ spec:
     {{- if or ( default .Values.rollout.blueGreen.enabled false ) ( default .Values.rollout.canary.enabled false ) }}
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
+    {{- else }}
+    apiVersion: apps/v1
+    kind: Deployment
     {{- end }}
     name: {{ include "kubernetes-service.fullname" . }}
   minReplicaCount: {{ .Values.autoscaling.minReplicas }}
@@ -47,7 +50,7 @@ spec:
         identityOwner: {{ default "operator" $queue.identityOwner }}
     {{- end }}
     {{- end }}
-    {{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.schema }}
+    {{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.connection }}
     - type: postgresql
       metadata:
         query: {{ if .Values.autoscaling.postgresql.schedNamePrefix }}{{ printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state IN ('WAITING', 'ACQUIRED') AND sched_name = '%s-%s'" .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.schedNamePrefix .Values.appVersion | quote }}{{ else }}{{ printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state IN ('WAITING', 'ACQUIRED')" .Values.autoscaling.postgresql.schema | quote }}{{ end }}

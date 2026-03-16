@@ -26,6 +26,9 @@ spec:
       behavior:
         {{- toYaml . | nindent 8 }}
   {{- end }}
+  {{- if not (or .Values.autoscaling.targetCPUUtilizationPercentage .Values.autoscaling.targetMemoryUtilizationPercentage .Values.autoscaling.sqs (and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.connection.secretName .Values.autoscaling.postgresql.connection.secretKey)) }}
+  {{- fail "KEDA autoscaling requires at least one trigger (cpu, memory, sqs, or postgresql)" }}
+  {{- end }}
   triggers:
     {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
     - type: cpu
@@ -50,13 +53,16 @@ spec:
         identityOwner: {{ default "operator" $queue.identityOwner }}
     {{- end }}
     {{- end }}
-    {{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.connection }}
+    {{- if and .Values.autoscaling.postgresql .Values.autoscaling.postgresql.schema .Values.autoscaling.postgresql.connection.secretName .Values.autoscaling.postgresql.connection.secretKey }}
     {{- $pg := .Values.autoscaling.postgresql }}
     {{- $query := printf "SELECT COUNT(*) FROM %s.qrtz_triggers WHERE trigger_state = 'WAITING' AND to_timestamp((next_fire_time + 5000) / 1000) <= CURRENT_TIMESTAMP" $pg.schema }}
     {{- if $pg.excludeGroups }}
     {{- $query = printf "%s AND trigger_group NOT IN ('%s')" $query (join "', '" $pg.excludeGroups) }}
     {{- end }}
     {{- if $pg.schedNamePrefix }}
+    {{- if not $.Values.appVersion }}
+    {{- fail "autoscaling.postgresql.schedNamePrefix requires appVersion to be set" }}
+    {{- end }}
     {{- $query = printf "%s AND sched_name = '%s-%s'" $query $pg.schedNamePrefix $.Values.appVersion }}
     {{- end }}
     - type: postgresql

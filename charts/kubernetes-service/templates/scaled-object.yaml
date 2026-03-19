@@ -4,6 +4,9 @@ kind: ScaledObject
 metadata:
   name: {{ include "kubernetes-service.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:

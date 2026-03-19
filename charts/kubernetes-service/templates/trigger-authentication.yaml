@@ -5,6 +5,9 @@ kind: TriggerAuthentication
 metadata:
   name: {{ printf "%s-postgresql-trigger-auth" (include "kubernetes-service.fullname" .) }}
   namespace: {{ .Release.Namespace }}
+  annotations:
+    "meta.helm.sh/release-name": {{ .Release.Name }}
+    "meta.helm.sh/release-namespace": {{ .Release.Namespace }}
   labels:
     {{- include "kubernetes-service.labels" . | nindent 4 }}
 spec:

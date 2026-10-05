@@ -245,11 +245,16 @@ spec:
               {{- end }}
             {{- end }}
             {{- end }}
-          {{- if .Values.efs.enabled }}
+          {{- if or .Values.efs.enabled .Values.extraVolumeMounts }}
           volumeMounts:
+            {{- if .Values.efs.enabled }}
             - name: efs-share
               mountPath: /mnt/efs
-          {{- end}}
+            {{- end }}
+            {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
         {{- if .Values.sqsd.enabled }}
         - name: {{ .Chart.Name }}-sqsd
           securityContext:
@@ -284,10 +289,15 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.efs.enabled }}
+      {{- if or .Values.efs.enabled .Values.extraVolumes }}
       volumes:
+        {{- if .Values.efs.enabled }}
         - name: efs-share
           persistentVolumeClaim:
             claimName: {{ .Values.efs.claimName }}
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
 {{- end }}

@@ -53,6 +53,29 @@ efs:
   enabled: false
   claimName: ""
 
+# Extra volumes and mounts for the main container.
+#
+# For delivering a file the application must read at startup that environment
+# variables cannot express -- an Encore infra config, for instance, whose host,
+# database name and username are plain strings in Encore's schema and so cannot
+# be $env references.
+#
+# Both default to empty, so releases that do not set them render exactly as before.
+#
+#   extraVolumes:
+#     - name: infra-config
+#       secret:
+#         secretName: dev-6-my-service-secret
+#         items:
+#           - key: infra-config.json
+#             path: infra.json
+#   extraVolumeMounts:
+#     - name: infra-config
+#       mountPath: /etc/encore
+#       readOnly: true
+extraVolumes: []
+extraVolumeMounts: []
+
 # Permissions section
 serviceAccount: ""
 
